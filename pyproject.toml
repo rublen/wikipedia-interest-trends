@@ -1,0 +1,27 @@
+[project]
+name = "wikipedia-interest-trends"
+version = "0.1.0"
+description = "Agent Skill: analyze Wikipedia pageview trends across topics and language editions"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib>=3.8",
+    "requests>=2.31",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+
+[tool.uv]
+# Not an installable package: scripts/wit.py puts scripts/ on sys.path,
+# so `import wikitrends` works for both uv and the pip fallback.
+package = false
+# setup.sh is POSIX-only, so lock for macOS and Linux only (add Windows with Windows support).
+environments = ["sys_platform == 'darwin'", "sys_platform == 'linux'"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["scripts"]
