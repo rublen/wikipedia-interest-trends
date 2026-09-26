@@ -61,6 +61,36 @@ def test_growth_undefined_without_previous_views():
     assert any("growth is undefined" in n for n in r["notes"])
 
 
+def _numbers(views, project, share, before=51273, after=37077):
+    return {"views_growth_pct": views, "project_growth_pct": project, "share_growth_pct": share,
+            "views_previous": before, "views_recent": after}
+
+
+def test_summary_spells_out_signs():
+    # The case Haiku misread: project_growth_pct -8.8 reported as "grew by 8.8%".
+    text = analyze.summarize("pl", _numbers(-27.7, -8.8, -20.7))
+    assert "Article views fell 27.7% (51,273 -> 37,077)" in text
+    assert "whole pl Wikipedia shrank 8.8%" in text
+    assert "share of all views fell 20.7%: it lost ground" in text
+    assert "-" not in text.replace("->", "")  # no minus signs left to misread
+
+
+def test_summary_explains_raw_vs_share_disagreement():
+    assert "Raw views fell only because the whole Wikipedia shrank faster" in \
+        analyze.summarize("uk", _numbers(-5.0, -20.0, 18.8))
+    assert "Raw views rose, but less than the whole Wikipedia grew" in \
+        analyze.summarize("en", _numbers(3.0, 10.0, -6.4))
+    assert "kept pace" in analyze.summarize("de", _numbers(-7.0, -7.3, 0.3))
+    assert "can't be computed" in analyze.summarize("de", _numbers(None, 1.0, None, before=0, after=5))
+
+
+def test_comparison_ranks_in_words():
+    languages = {"uk": {"share_growth_pct": -37.5}, "pl": {"share_growth_pct": -20.7}, "de": {"status": "no_article"}}
+    assert analyze.comparison(languages) == ("Ranked by change in share of attention, best first: "
+                                             "pl (share fell 20.7%), uk (share fell 37.5%).")
+    assert analyze.comparison({"pl": {"share_growth_pct": 1.0}}) is None
+
+
 # --- resolve ----------------------------------------------------------------
 
 def _mercury_like_client(top_hit_is_most_linked: bool, ratio: float) -> FakeClient:

@@ -40,7 +40,7 @@ SKILL_DIR/.venv/bin/python SKILL_DIR/scripts/wit.py compare "<topic in English>"
 | status | What to do |
 |---|---|
 | `ok` | Check `topic.description` matches what the user means. If not, rerun with a `--qid` from `topic.resolution.candidates` or a more specific topic. Then answer (below). |
-| `ambiguous` | `resolution.reason` says why. Pick the candidate from `resolution.candidates` that fits the user's context and rerun with `--qid Q…`. If unclear, show the user 2–3 candidates (label + description) and ask. |
+| `ambiguous` | `resolution.reason` says why. If the user's context clearly points to one candidate in `resolution.candidates` (e.g. "chemistry app" → the element), say which one you chose and rerun with `--qid Q…`. Otherwise **stop**: list 2–3 candidates (label + description), ask which one, and end your reply. Do not run the analysis on a guess. |
 | `not_found` | Retry with the English name, a more common wording, or `--search-lang`. |
 | `error` | Report the message. Network errors: retry once. |
 
@@ -50,15 +50,17 @@ report it, don't hide it); `unknown_language` = wrong language code.
 
 ## Writing the answer
 
-Use only numbers from the JSON. Structure:
+Use only numbers from the JSON. The script already interprets them: **quote each
+language's `summary` and the top-level `comparison` verbatim**, word for word. Don't
+paraphrase them or add your own explanation of why numbers differ (no "despite",
+"because", "reflects"). Don't work out directions from the `_pct` fields yourself. Structure:
 
 1. **What was measured**: the Wikidata item (label, description), the article title per
    language, the two windows from `period`.
-2. **Results per language**: `share_growth_pct` is the main comparison number (views
-   as a share of all views in that Wikipedia, so languages of different size and
-   traffic trends are comparable). Also give `views_growth_pct`, `avg_monthly_views_recent`,
-   and `project_growth_pct` when it explains a difference between raw and share growth.
-   Order languages by `ranking_by_share_growth`.
+2. **Results per language**, in `ranking_by_share_growth` order: the language's
+   `summary` (verbatim), plus `avg_monthly_views_recent` for scale. Change in share is the main
+   comparison (it removes differences in each Wikipedia's size and overall traffic).
+   With 2+ languages, add the `comparison` sentence.
 3. **Notes**: every item in `languages.<code>.notes` and `period.notes`, and any
    `no_article` languages.
 4. **Caveats**: the result has no confidence level yet (`not_yet_checked`), so call

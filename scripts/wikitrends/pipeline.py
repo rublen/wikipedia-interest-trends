@@ -120,7 +120,7 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path) -> dict:
             not_shown[lang] = "no article on this topic"
         else:
             languages[lang] = {"status": "ok", "title": spec["titles"][lang],
-                               **analyze.analyze_language(months, article, project)}
+                               **analyze.analyze_language(months, article, project, lang)}
             plotted[lang] = {"views": article, "share": analyze.monthly_share(article, project)}
 
     ranked = sorted((lang for lang, r in languages.items() if r.get("share_growth_pct") is not None),
@@ -134,6 +134,7 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path) -> dict:
                    "notes": spec["notes"]},
         "languages": languages,
         "ranking_by_share_growth": ranked,
+        "comparison": analyze.comparison(languages),
         "files": {},
         "limitations": LIMITATIONS,
         "not_yet_checked": NOT_YET_CHECKED,

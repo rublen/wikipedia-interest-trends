@@ -23,7 +23,8 @@ def _round_share(value: float | None) -> float | None:
     return round(value, 2) if value < 100 else round(value)
 
 
-def analyze_language(months: list[str], article: dict[str, int], project: dict[str, int]) -> dict:
+def analyze_language(months: list[str], article: dict[str, int], project: dict[str, int],
+                     lang: str = "this") -> dict:
     """Compare the first half of `months` (previous window) with the second half (recent window)."""
     half = len(months) // 2
     previous, recent = months[:half], months[half:]
@@ -48,7 +49,7 @@ def analyze_language(months: list[str], article: dict[str, int], project: dict[s
     if missing_totals:
         notes.append(f"project totals missing for {', '.join(missing_totals)}")
 
-    return {
+    result = {
         "views_previous": a_prev,
         "views_recent": a_recent,
         "views_growth_pct": growth_pct(a_prev, a_recent),
@@ -60,6 +61,50 @@ def analyze_language(months: list[str], article: dict[str, int], project: dict[s
         "first_month_with_data": first_with_data,
         "notes": notes,
     }
+    return {"summary": summarize(lang, result), **result}
+
+
+# Changes smaller than this (in %) are described as "about the same".
+UNCHANGED_PCT = 1.0
+
+
+def _change(pct: float, up: str = "rose", down: str = "fell") -> str:
+    """-8.8 -> 'fell 8.8%'. Signs become words, so a reader can't misread a minus sign."""
+    if abs(pct) < UNCHANGED_PCT:
+        return f"stayed about the same ({pct:+.1f}%)"
+    return f"{up if pct > 0 else down} {abs(pct):.1f}%"
+
+
+def summarize(lang: str, r: dict) -> str:
+    """One plain-language interpretation of a language's numbers, written by code, not the agent."""
+    views, share, project = r["views_growth_pct"], r["share_growth_pct"], r["project_growth_pct"]
+    if r["views_recent"] == 0 and r["views_previous"] == 0:
+        return "No recorded views in the whole period, so interest can't be measured."
+    if views is None or share is None or project is None:
+        return "The article had no views in the previous window, so growth can't be computed."
+
+    text = (f"Article views {_change(views)} ({r['views_previous']:,} -> {r['views_recent']:,}). "
+            f"The whole {lang} Wikipedia {_change(project, 'grew', 'shrank')} over the same time, "
+            f"so the article's share of all views {_change(share)}")
+    if abs(share) < UNCHANGED_PCT:
+        return text + ": interest kept pace with the rest of that Wikipedia."
+    direction = "gained" if share > 0 else "lost"
+    text += f": it {direction} ground relative to the rest of that Wikipedia."
+    if views < -UNCHANGED_PCT and share > UNCHANGED_PCT:
+        text += " Raw views fell only because the whole Wikipedia shrank faster."
+    elif views > UNCHANGED_PCT and share < -UNCHANGED_PCT:
+        text += " Raw views rose, but less than the whole Wikipedia grew."
+    return text
+
+
+def comparison(languages: dict[str, dict]) -> str | None:
+    """Rank languages by change in share, in words (None if fewer than two)."""
+    ranked = sorted(((lang, r["share_growth_pct"]) for lang, r in languages.items()
+                     if r.get("share_growth_pct") is not None), key=lambda x: x[1], reverse=True)
+    if len(ranked) < 2:
+        return None
+    parts = [f"{lang} (share {_change(pct)})" for lang, pct in ranked]
+    return "Ranked by change in share of attention, best first: " + ", ".join(parts) + "."
 
 
 def monthly_share(article: dict[str, int], project: dict[str, int]) -> dict[str, float | None]:

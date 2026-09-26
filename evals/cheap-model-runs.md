@@ -74,3 +74,44 @@ Prompt: "How has interest in Mercury changed in the German Wikipedia over the la
    with the question and no analysis is run.
 3. The `resolution` block itself worked: in both runs the model used `candidates`
    (description + count) correctly and passed `--qid`.
+
+### After the fixes: same two prompts, run 2
+
+Changes: per-language `summary` and top-level `comparison` sentences written by the script
+(directions as words: rose/fell, grew/shrank, gained/lost ground); `SKILL.md` says to use
+them, and to stop after asking when the context doesn't decide an ambiguous topic.
+
+**A. With context** (`runs/2026-09-26-haiku-mercury-context-run2.md`), 6 turns, 25 s, $0.038
+- ✅ Chose the element Q925 from context; all numbers correct.
+- ✅ The sign error is gone: "Polish Wikipedia overall shrank 8.8%", "Ukrainian Wikipedia shrinking 24.6%".
+- ⚠️ It paraphrased instead of using the sentences as written and added a misleading
+  connective for uk: "its share fell 37.5%, much steeper, **despite** Ukrainian Wikipedia
+  shrinking 24.6%". The shrinking wiki is why the share fell *less* than raw views, so
+  "despite" doesn't fit. No number is wrong, but the causal wording is.
+- ⚠️ It said the output is "in your project directory"; it is in the skill directory
+  (known follow-up: output location).
+
+**B. Without context** (`runs/2026-09-26-haiku-mercury-nocontext-run2.md`), 4 turns, 11 s, $0.015
+- ✅ Fixed: listed planet / element / Roman god, asked which one, suggested the planet as
+  most likely, and **stopped** without running the analysis.
+
+Remaining idea: ask the agent to quote `summary` verbatim (not just "keep direction
+words"), since paraphrasing is where the wrong connective came in.
+
+### Run 3: `summary` quoted verbatim
+
+Change: `SKILL.md` now says to quote each `summary` and the `comparison` word for word and
+not to add its own explanations ("despite", "because", "reflects").
+
+**A. With context** (`runs/2026-09-26-haiku-mercury-context-run3.md`), 6 turns, 24 s, $0.029
+- ✅ Chose the element Q925 from context and said so.
+- ✅ Both `summary` sentences and the `comparison` quoted exactly; no misleading
+  connectives. Added `avg_monthly_views_recent` for scale as instructed.
+- ⚠️ Minor wording in the caveat ("not willingness to market a course") and a closing line
+  of its own ("interest… is moving away from both these markets"), consistent with the data.
+
+**B. Without context** (`runs/2026-09-26-haiku-mercury-nocontext-run3.md`), 5 turns, 18 s, $0.021
+- ✅ Listed the planet and the element with QIDs, asked which one, and stopped.
+
+Result: both failures from the first mercury runs are fixed. Trade-off: answers are more
+formulaic, but every interpretation now comes from tested code.
