@@ -98,7 +98,8 @@ def test_period_before_bot_flagging_caps_at_medium():
 def test_sentence_puts_lowering_reasons_first():
     trend = {"verdict": "declining", "confidence": "medium",
              "reasons": ["about 500 views a month is a small base", "12 of 12 months were below"]}
-    assert trust.sentence(trend) == ("Verdict: declining, with medium confidence: about 500 views a "
+    assert trust.sentence(trend) == ("Verdict: declining, with medium confidence (probably real, but "
+                                     "weakened by the reasons listed). Reasons: about 500 views a "
                                      "month is a small base; 12 of 12 months were below.")
 
 
@@ -122,3 +123,15 @@ def test_recent_shift_is_called_too_recent_to_tell():
     t = assess(series(6000, [6000] * 10 + [20_000, 20_000]))  # 3.3x: above SHIFT_FACTOR
     assert t["checks"]["level_shift"]["month"] == MONTHS[-2]
     assert any("too recent to tell" in r for r in t["reasons"])
+
+
+def test_reasons_state_directions_in_words():
+    steady = assess(series([5000 * w for w in WOBBLE], [6500 * w for w in WOBBLE]))
+    flat = assess(series([5000 * w for w in WOBBLE], [5200 * w for w in reversed(WOBBLE)]))
+    recent = [1000] * 12
+    recent[5] = 30_000
+    spiky = assess(series(1000, recent))
+    for t in (steady, flat, spiky):
+        for reason in t["reasons"]:
+            assert "(+" not in reason and "(-" not in reason, reason
+    assert any(r.startswith("the share rose 30.0%, more than") for r in steady["reasons"])

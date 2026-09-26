@@ -16,6 +16,10 @@ from wikitrends.pageviews import article_monthly, project_monthly
 
 SPEC_VERSION = 2  # 2: year-on-year comparison window
 
+# Quoted once per answer (SKILL.md): keeps the conclusion within what pageviews can show.
+SCOPE = ("Pageviews measure reader interest on Wikipedia, not willingness to pay or market size: "
+         "use this to choose what to validate next, not to decide on its own.")
+
 LIMITATIONS = [
     "Pageviews measure curiosity among Wikipedia readers, not willingness to pay or market size.",
     "One Wikidata item = one article per language; related articles and redirects are not counted.",
@@ -145,6 +149,7 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path) -> dict:
         "languages": languages,
         "ranking_by_share_growth": ranked,
         "comparison": analyze.comparison(languages),
+        "scope": SCOPE,
         "files": {},
         "limitations": LIMITATIONS,
     }

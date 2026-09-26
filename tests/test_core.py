@@ -84,6 +84,12 @@ def test_summary_explains_raw_vs_share_disagreement():
     assert "can't be computed" in analyze.summarize("de", _numbers(None, 1.0, None, before=0, after=5))
 
 
+def test_summary_follows_a_no_clear_change_verdict():
+    text = analyze.summarize("pl", _numbers(-16.1, -8.8, -8.0), verdict="no_clear_change")
+    assert "share of all views fell 8.0%, which is not a clear change in either direction." in text
+    assert "lost ground" not in text
+
+
 def test_comparison_ranks_in_words():
     languages = {"uk": {"share_growth_pct": -37.5}, "pl": {"share_growth_pct": -20.7}, "de": {"status": "no_article"}}
     assert analyze.comparison(languages) == ("Ranked by change in share of attention, best first: "

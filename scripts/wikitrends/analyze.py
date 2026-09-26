@@ -71,7 +71,7 @@ def analyze_language(months: list[str], article: dict[str, int], project: dict[s
     }
     trend = trust.assess(months, article, project, result["share_growth_pct"],
                          result["views_growth_pct"], automated, window)
-    summary = summarize(lang, result) + " " + trust.sentence(trend)
+    summary = summarize(lang, result, trend["verdict"]) + " " + trust.sentence(trend)
     return {"summary": summary, "trend": trend, **result}
 
 
@@ -86,8 +86,12 @@ def _change(pct: float, up: str = "rose", down: str = "fell") -> str:
     return f"{up if pct > 0 else down} {abs(pct):.1f}%"
 
 
-def summarize(lang: str, r: dict) -> str:
-    """One plain-language interpretation of a language's numbers, written by code, not the agent."""
+def summarize(lang: str, r: dict, verdict: str | None = None) -> str:
+    """One plain-language interpretation of a language's numbers, written by code, not the agent.
+
+    With `verdict` "no_clear_change", small changes are not described as gaining or losing
+    ground, so the sentence can't contradict the verdict that follows it.
+    """
     views, share, project = r["views_growth_pct"], r["share_growth_pct"], r["project_growth_pct"]
     if r["views_recent"] == 0 and r["views_previous"] == 0:
         return "No recorded views in the whole period, so interest can't be measured."
@@ -101,6 +105,8 @@ def summarize(lang: str, r: dict) -> str:
             f"so the article's share of all views {_change(share)}")
     if abs(share) < UNCHANGED_PCT:
         return text + ": interest kept pace with the rest of that Wikipedia."
+    if verdict == "no_clear_change":
+        return text + ", which is not a clear change in either direction."
     direction = "gained" if share > 0 else "lost"
     text += f": it {direction} ground relative to the rest of that Wikipedia."
     if views < -UNCHANGED_PCT and share > UNCHANGED_PCT:

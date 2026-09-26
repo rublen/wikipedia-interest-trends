@@ -145,3 +145,73 @@ interest in this topic growing on Ukrainian Wikipedia, and how far can that grow
 - ⚠️ Called "16,614 → 6,708" a *monthly average*; they are 12-month totals (the average is 559).
 - **Root cause:** the `summary` gave the totals without a unit.
 - **Fix:** the summary now says "… views in total over the 12 compared months".
+
+### Run 4: after the unit fix (`runs/2026-09-27-haiku-ex2-run4.md`), 5 turns, 19 s, $0.032
+- ✅ Quoted the summary exactly, including "16,614 → 6,708 views in total over the 12
+  compared months"; the totals were not called an average this time.
+- ✅ Verdict, confidence and all four reasons verbatim; chart path given; no permission errors.
+- ⚠️ Still words the confidence its own way: "medium confidence … a **weak signal** … the
+  decline is real enough", instead of the fixed meaning from `SKILL.md` ("probably real,
+  but weakened by the reasons listed").
+- ⚠️ Ends with a recommendation of its own ("the data argues against pursuing astronomy in
+  Ukrainian"), a stronger conclusion than "interest is declining" supports.
+
+### Run 5: confidence meaning written by the script (`runs/2026-09-27-haiku-ex2-run5.md`), 5 turns, 20 s, $0.035
+Change: the verdict sentence now includes the fixed meaning of the level ("Verdict: declining,
+with medium confidence (probably real, but weakened by the reasons listed). Reasons: …"), and
+`SKILL.md` frames recommendations as what to check next, not go/no-go.
+- ✅ Quoted the verdict with its meaning verbatim; no invented "weak signal" wording.
+- ✅ Explained the medium level with the actual reasons: strong, consistent decline, weakened
+  by the small base (~559 views/month).
+- ✅ The recommendation stays within the data: "Ukrainian Wikipedia doesn't support that
+  hypothesis … check other language editions or markets", not "don't build the course".
+- ⚠️ Paraphrased the summary instead of quoting it; the wording stayed correct ("astronomy
+  fell much faster" than the whole Wikipedia). One small slip: "10 of 12 months show lower
+  **views**"; the check counts the *share*, not raw views.
+
+## 2026-09-27 — Rubric-scored batch: example #2 ×3, example #1 ×1 (regression), Claude Haiku 4.5
+
+Changes before this batch: directions in trust reasons as words ("the share fell 46.4%",
+no signed numbers); summary sentence follows a "no clear change" verdict (no "lost ground"
+for an 8% move); top-level `scope` sentence, quoted once per answer. First batch scored
+against [`rubric.md`](rubric.md). G7, G9 and G11 were checked with `grep` on the final
+answer; the rest by reading the transcript. Numbers cited were checked against `result.json`.
+
+Runs: `runs/2026-09-27-haiku-ex2-run6.md`, `-run7.md`, `-run8.md`, `runs/2026-09-27-haiku-ex1-run3.md`.
+All 4: 5 turns, 18–21 s, $0.023–0.034, no tool errors.
+
+| Item | ex2 run6 | ex2 run7 | ex2 run8 | ex1 run3 | Count |
+|---|---|---|---|---|---|
+| G1 Uses the skill | pass | pass | pass | pass | 4/4 |
+| G2 Right topic | pass | pass | pass | pass | 4/4 |
+| G3 Numbers from the JSON | pass | pass | pass | pass | 4/4 |
+| G4 Units | **fail** | pass | pass | pass | 3/4 |
+| G5 Directions | pass | pass | pass | pass | 4/4 |
+| G6 Verdict and confidence | pass | pass | pass | pass | 4/4 |
+| G7 Confidence meaning quoted | pass | **fail** | pass | pass | 3/4 |
+| G8 No invented reasons | pass | pass | pass | pass | 4/4 |
+| G9 Scope quoted once | pass | **fail** | pass | pass | 3/4 |
+| G10 Next checks, not go/no-go | pass | pass | pass (note) | n/a | 3/3 |
+| G11 Chart path | pass | pass | **fail** | pass | 3/4 |
+| E1a Missing edition reported | – | – | – | pass | 1/1 |
+| E2a Trust question answered | pass | pass | pass | – | 3/3 |
+
+Evidence for the failures and notes:
+- **G4, run6:** "the article reaches about 9.89 **readers** per million". 9.89 is correct
+  (`share_per_million_recent`), but it counts views per million views, not readers.
+- **G7, run7:** quoted the meaning in the summary, but the opening line says "the decline
+  **is real**, though flagged with medium confidence", which is stronger than "probably real".
+- **G9, run7:** no scope sentence; it paraphrased the idea instead ("validate demand through
+  other channels before investing heavily").
+- **G11, run8:** gave the output folder, not `chart.png`.
+- **G10 note, run8:** "falling Wikipedia interest suggests **demand may not be there**" edges
+  toward treating interest as demand, but it then quotes the scope sentence and recommends
+  validating before dismissing the idea. Scored pass.
+- **E1a, ex1 run3:** "Polish Wikipedia: No article is linked to this topic, so interest
+  cannot be measured there with this method." The missing-edition path survived the format
+  change (regression check passed).
+
+Reading: every failure is a single occurrence, and each is a different item, so none is
+systematic yet. What held in 4/4: numbers, directions, verdicts, and no invented reasons,
+which are the items the script-written sentences were meant to protect. The fails are
+all in the model's *own* sentences around the quotes (openers, labels, omissions).

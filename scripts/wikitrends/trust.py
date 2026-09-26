@@ -30,6 +30,13 @@ SHIFT_SPAN = 3                 # months on each side of a level shift
 YEAR = 12
 
 LEVELS = ("low", "medium", "high")
+# Fixed plain-language meaning of each level, written into the summary so agents quote it
+# instead of inventing their own ("weak signal", "real enough to act on", ...).
+MEANINGS = {
+    "high": "the data consistently shows this; still only a signal of reader interest",
+    "medium": "probably real, but weakened by the reasons listed",
+    "low": "don't rely on this alone; check the reasons before acting",
+}
 
 
 def windows(months: list[str], window: int) -> tuple[list[str], list[str]]:
@@ -45,6 +52,11 @@ def _verdict(change_pct: float | None, noise_pct: float | None = None) -> str:
     if abs(change_pct) < MIN_EFFECT_PCT or (noise_pct is not None and abs(change_pct) < noise_pct):
         return "no_clear_change"
     return "growing" if change_pct > 0 else "declining"
+
+
+def _moved(pct: float, decimals: int = 1) -> str:
+    """-46.4 -> 'fell 46.4%'. Reasons state directions in words, never with a sign."""
+    return f"{'rose' if pct > 0 else 'fell'} {abs(pct):.{decimals}f}%"
 
 
 def _pct(before: float, after: float) -> float | None:
@@ -146,7 +158,7 @@ def assess(months: list[str], article: dict[str, int], project: dict[str, int],
 
     with_data = [m for m in compared if article[m] > 0]
     if not with_data or share_growth_pct is None:
-        return {"verdict": "insufficient_data", "confidence": "low",
+        return {"verdict": "insufficient_data", "confidence": "low", "confidence_meaning": MEANINGS["low"],
                 "reasons": ["no views in the year-earlier months, so there is nothing to compare against"
                             if with_data else "no recorded views in the compared months"],
                 "checks": {}}
@@ -168,13 +180,13 @@ def assess(months: list[str], article: dict[str, int], project: dict[str, int],
         conf.support.append(f"month-to-month changes vary a lot (±{noise:.0f}%), but {agree} of "
                             f"{len(moved)} changed months moved the same way, which is unlikely by chance")
     elif verdict in ("growing", "declining") and noise is not None:
-        conf.support.append(f"the change in share ({share_growth_pct:+.1f}%) is larger than the "
+        conf.support.append(f"the share {_moved(share_growth_pct)}, more than the "
                             f"±{noise:.0f}% that month-to-month variation could produce")
     elif verdict == "no_clear_change" and abs(share_growth_pct) >= MIN_EFFECT_PCT and noise is not None:
-        conf.support.append(f"the change in share ({share_growth_pct:+.1f}%) is within the "
+        conf.support.append(f"the share {_moved(share_growth_pct)}, which is within the "
                             f"±{noise:.0f}% that normal month-to-month variation could produce")
     elif verdict == "no_clear_change":
-        conf.support.append(f"the change in share ({share_growth_pct:+.1f}%) is below "
+        conf.support.append(f"the share {_moved(share_growth_pct)}, less than "
                             f"{MIN_EFFECT_PCT:g}%, too small to matter")
 
     if n < SHORT_WINDOW:
@@ -199,7 +211,7 @@ def assess(months: list[str], article: dict[str, int], project: dict[str, int],
     if verdict in ("growing", "declining") and median_verdict != verdict:
         typical_text = ("typical months show no clear change" if median_verdict in
                         ("no_clear_change", "insufficient_data")
-                        else f"typical months moved the other way ({median_change:+.0f}%)")
+                        else f"typical months moved the other way (they {_moved(median_change, 0)})")
         spike_text = f" (spikes: {', '.join(spikes)})" if spikes else ""
         conf.cap("low", f"the change comes from a few unusual months{spike_text}; {typical_text}")
     elif spikes and verdict in ("growing", "declining"):
@@ -274,14 +286,16 @@ def assess(months: list[str], article: dict[str, int], project: dict[str, int],
     return {
         "verdict": verdict,
         "confidence": conf.level,
+        "confidence_meaning": MEANINGS[conf.level],
         "reasons": conf.lowered + conf.support,
         "checks": checks,
     }
 
 
 def sentence(trend: dict) -> str:
-    """'Verdict: declining, with medium confidence: <reasons>.' for the language summary."""
+    """'Verdict: declining, with medium confidence (<meaning>). Reasons: <reasons>.'"""
     verdict = trend["verdict"].replace("_", " ")
     reasons = trend["reasons"][:3]
-    text = f"Verdict: {verdict}, with {trend['confidence']} confidence"
-    return text + (": " + "; ".join(reasons) + "." if reasons else ".")
+    text = (f"Verdict: {verdict}, with {trend['confidence']} confidence "
+            f"({MEANINGS[trend['confidence']]}).")
+    return text + (" Reasons: " + "; ".join(reasons) + "." if reasons else "")

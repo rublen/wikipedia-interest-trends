@@ -48,3 +48,46 @@ Command: `.venv/bin/python scripts/wit.py resolve astronomy --langs uk` (`resolu
 (`action=sitematrix`, cached 7 days) instead of guessing from the id. After the fix: Q333
 = 252, Q411 = 92, Q308 = 250. The astronomy ratio changed from 2.75 to 2.74; no decision
 changed. Regression test: `test_sister_projects_are_not_counted_as_wikipedias`.
+
+## 3. Ukrainian "Астрономія" (astronomy): "10 of 12 months below the same month a year earlier" — 2026-09-27
+
+Command: `.venv/bin/python scripts/wit.py compare --qid Q333 --langs uk` (the example #2 scenario).
+The count is on the **share** (article views ÷ all uk.wikipedia views, per million), so each
+month needs two numbers. Values the skill used (`output/Q333-astronomy/monthly.csv`):
+
+| Month | Article, year earlier | uk.wikipedia, year earlier | Share | Article, recent | uk.wikipedia, recent | Share | Recent vs year earlier |
+|---|---|---|---|---|---|---|---|
+| Sep | 4,687 | 74,509,285 | 62.90 | 1,642 | 61,256,706 | 26.81 | lower |
+| Oct | 1,776 | 83,014,264 | 21.39 | 635 | 66,044,662 | 9.61 | lower |
+| Nov | 1,746 | 83,835,060 | 20.83 | 557 | 67,137,685 | 8.30 | lower |
+| Dec | 1,634 | 84,431,475 | 19.35 | 622 | 55,497,356 | 11.21 | lower |
+| Jan | 1,558 | 94,111,809 | 16.55 | 449 | 60,471,976 | 7.42 | lower |
+| Feb | 1,296 | 81,951,788 | 15.81 | 425 | 51,614,348 | 8.23 | lower |
+| Mar | 1,068 | 79,609,260 | 13.42 | 410 | 55,114,806 | 7.44 | lower |
+| Apr | 1,019 | 72,146,878 | 14.12 | 405 | 53,385,280 | 7.59 | lower |
+| May | 789 | 69,040,303 | 11.43 | 600 | 55,950,057 | 10.72 | lower |
+| Jun | 361 | 53,652,676 | 6.73 | 281 | 48,312,008 | 5.82 | lower |
+| Jul | 305 | 62,209,478 | 4.90 | 322 | 52,999,047 | 6.08 | higher |
+| Aug | 375 | 61,801,817 | 6.07 | 360 | 50,720,483 | 7.10 | higher |
+
+Year earlier = Sep 2024 – Aug 2025; recent = Sep 2025 – Aug 2026. 10 lower, 2 higher.
+
+Manual check (browser; switch the tools to **monthly** and use agent = user, all-access):
+
+| Month pair | Value | Skill | Independent (manual) check | Match? |
+|---|---|---|---|---|
+| Sep 2024 / Sep 2025 | article views | 4,687 / 1,642 | 4,687 / 1,642 | yes |
+| Sep 2024 / Sep 2025 | uk.wikipedia views | 74,509,285 / 61,256,706 | 74,509,285 / 61,256,706 | yes |
+| Jan 2025 / Jan 2026 | article views | 1,558 / 449 | 1,558 / 449 | yes |
+| Jan 2025 / Jan 2026 | uk.wikipedia views | 94,111,809 / 60,471,976 | 94,111,809 / 60,471,976 | yes |
+| Jul 2025 / Jul 2026 | article views | 305 / 322 | 305 / 322 | yes |
+| Jul 2025 / Jul 2026 | uk.wikipedia views | 62,209,478 / 52,999,047 | 62,209,478 / 52,999,047 | yes |
+
+- Article: [pageviews.wmcloud.org, Астрономія](https://pageviews.wmcloud.org/?project=uk.wikipedia.org&platform=all-access&agent=user&redirects=0&start=2024-09-01&end=2026-08-31&pages=%D0%90%D1%81%D1%82%D1%80%D0%BE%D0%BD%D0%BE%D0%BC%D1%96%D1%8F)
+- Whole Ukrainian Wikipedia: [siteviews, uk.wikipedia](https://pageviews.wmcloud.org/siteviews/?platform=all-access&source=pageviews&agent=user&start=2024-09-01&end=2026-08-31&sites=uk.wikipedia.org)
+- Then recompute the share for each checked pair (article ÷ total × 1,000,000) and confirm
+  its direction. As entry 1 showed, monthly totals can differ slightly from summed daily
+  values; small gaps are expected, a different direction is not.
+
+**Result:** all six values match exactly. Recomputed shares: Sep 62.90 → 26.81 (lower),
+Jan 16.55 → 7.42 (lower), Jul 4.90 → 6.08 (higher), the same directions as the skill.

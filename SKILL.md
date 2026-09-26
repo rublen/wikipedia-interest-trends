@@ -67,18 +67,19 @@ paraphrase them or add your own explanation of why numbers differ (no "despite",
    add the `comparison` sentence.
 3. **Notes**: every item in `languages.<code>.notes` and `period.notes`, and any
    `no_article` languages.
-4. **Trust**: state each language's `trend.verdict` and `trend.confidence` as given.
+4. **Trust**: the `summary` already states the verdict, the confidence and what that
+   confidence level means; quote it and don't describe the level in your own words.
    If the user asks how far to trust a result, list that language's `trend.reasons`
-   (verbatim). Explain the level only with these fixed meanings:
-   - high: "the data consistently shows this; still only a signal of reader interest"
-   - medium: "probably real, but weakened by the reasons listed"
-   - low: "don't rely on this alone; check the reasons before acting"
-   Seasonality is already handled (same months a year earlier); don't cite it as a weakness.
-5. **Caveats**: mention the key `limitations` (interest ≠ willingness to pay).
+   (verbatim). Seasonality is already handled (same months a year earlier); don't cite
+   it as a weakness.
+5. **Scope**: quote the top-level `scope` sentence once, verbatim. Add other
+   `limitations` only if they matter for this question.
 6. **Chart**: always give the path in `files.chart`; the data is in `files.data` (CSV).
 
 Keep it short. Never state a higher confidence than `trend.confidence`, and don't call a
-`no_clear_change` result growth or decline.
+`no_clear_change` result growth or decline. Recommendations are about **what to check
+next** (e.g. "validate demand in pl before uk"), never a go/no-go on the product: reader
+interest alone can't decide that.
 
 ## Follow-up questions
 
