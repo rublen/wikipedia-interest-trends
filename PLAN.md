@@ -79,12 +79,12 @@ wikipedia-interest-trends/
 
 ## Iterations
 
-### 0. Skeleton
+### 0. Skeleton — ✅ done
 - Clean `.gitignore`; add `pyproject.toml`, `uv.lock`, exported `requirements.txt`,
   `setup.sh`, stub `scripts/wit.py` + `scripts/wikitrends/`, minimal `SKILL.md`.
 - ✅ `./setup.sh && .venv/bin/python scripts/wit.py --help` works on both setup paths.
 
-### 1. MVP: answer example #1 end-to-end
+### 1. MVP: answer example #1 end-to-end — built; Haiku run passed; manual check pending
 - **Primary path, a facade:** `wit.py compare "<topic>" --langs pl,cs --months 24`
   chains resolve → fetch → analyze → chart in one call. Fewer calls means fewer failures
   on a cheap model.

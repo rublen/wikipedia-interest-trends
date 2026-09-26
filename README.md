@@ -26,6 +26,18 @@ covers only macOS and Linux (`[tool.uv] environments` in `pyproject.toml`).
 Both paths create `.venv/`. Run the CLI with `.venv/bin/python scripts/wit.py --help`.
 `WIT_SETUP=pip ./setup.sh` forces the fallback path.
 
+## Usage
+
+```bash
+.venv/bin/python scripts/wit.py compare "intermittent fasting" --langs pl,cs --months 24
+.venv/bin/python scripts/wit.py compare mercury --langs uk,en        # -> "ambiguous" + candidates
+.venv/bin/python scripts/wit.py compare --qid Q308 --langs uk,en     # pick the planet
+```
+
+Prints one JSON object (per-language raw and normalized growth, notes, limitations) and
+writes `chart.png`, `monthly.csv`, `result.json` and `query.json` to `output/<qid>-<label>/`.
+API responses are cached in `.cache/`.
+
 ## Development
 
 ```bash

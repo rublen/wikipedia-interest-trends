@@ -17,3 +17,6 @@ output/
 .DS_Store
 .idea/
 .vscode/
+
+# Raw agent transcripts (contain session metadata); commit the .md conversions instead
+evals/runs/*.jsonl
