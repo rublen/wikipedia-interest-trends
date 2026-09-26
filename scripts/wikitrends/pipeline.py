@@ -8,25 +8,24 @@ import re
 from datetime import date
 from pathlib import Path
 
-from wikitrends import analyze, chart
+from wikitrends import analyze, chart, trust
 from wikitrends.api import Client
 from wikitrends.config import OUTPUT_DIR
 from wikitrends.months import FIRST_AVAILABLE, add_months, last_complete_month, month_range
 from wikitrends.pageviews import article_monthly, project_monthly
 
-SPEC_VERSION = 1
+SPEC_VERSION = 2  # 2: year-on-year comparison window
 
 LIMITATIONS = [
     "Pageviews measure curiosity among Wikipedia readers, not willingness to pay or market size.",
     "One Wikidata item = one article per language; related articles and redirects are not counted.",
     "agent=user excludes identified bots, but undetected bots can remain (classification improved in April 2020).",
+    "Confidence comes from rules of thumb (volume, spikes, consistency, noise, data artifacts), not a statistical model.",
 ]
 # Files analyze_spec writes; removed at the start of each run so none can be left over
 # from an earlier run with different languages (query.json is written by the caller).
 GENERATED_FILES = ("chart.png", "monthly.csv", "result.json")
 
-NOT_YET_CHECKED = ("spikes/one-off events, seasonality, month-by-month consistency, bot share; "
-                   "no confidence level is computed yet, so present results as indicative")
 
 
 class SpecError(ValueError):
@@ -46,10 +45,14 @@ def build_spec(client: Client, resolved: dict, query: str | None, langs: list[st
     if project_monthly(client, check_lang, end, end, last_complete=end)[end] == 0:
         notes.append(f"{end} is not published yet; the period ends at {add_months(end, -1)}")
         end = add_months(end, -1)
-    start = add_months(end, -(months - 1))
+    # Compare the last `window` months with the same months a year earlier; a longer
+    # `months` only extends the history shown in the chart and used by the trust checks.
+    window = min(months, trust.YEAR)
+    total = max(months, window + trust.YEAR)
+    start = add_months(end, -(total - 1))
     if start < FIRST_AVAILABLE:
         available = len(month_range(FIRST_AVAILABLE, end))
-        raise SpecError(f"pageview data starts at {FIRST_AVAILABLE}; at most {available - available % 2} "
+        raise SpecError(f"pageview data starts at {FIRST_AVAILABLE}; at most {available} "
                         f"months are available up to {end}")
 
     item = resolved["item"]
@@ -62,6 +65,7 @@ def build_spec(client: Client, resolved: dict, query: str | None, langs: list[st
         "langs": langs,
         "titles": resolved["titles"],
         "months": months,
+        "window": window,
         "start": start,
         "end": end,
         "last_complete_month": last_complete_month(today),
@@ -93,6 +97,8 @@ def fetch(client: Client, spec: dict) -> dict[str, dict]:
         title = spec["titles"].get(lang)
         data[lang] = {
             "article": article_monthly(client, lang, title, start, end, last) if title else None,
+            "automated": article_monthly(client, lang, title, start, end, last, agent="automated")
+                         if title else None,
             "project": project_monthly(client, lang, start, end, last),
         }
     return data
@@ -100,7 +106,8 @@ def fetch(client: Client, spec: dict) -> dict[str, dict]:
 
 def analyze_spec(client: Client, spec: dict, out_dir: Path) -> dict:
     months = month_range(spec["start"], spec["end"])
-    half = len(months) // 2
+    window = spec["window"]
+    previous, recent = trust.windows(months, window)
     data = fetch(client, spec)
     out_dir = Path(out_dir)
     for name in GENERATED_FILES:
@@ -120,7 +127,8 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path) -> dict:
             not_shown[lang] = "no article on this topic"
         else:
             languages[lang] = {"status": "ok", "title": spec["titles"][lang],
-                               **analyze.analyze_language(months, article, project, lang)}
+                               **analyze.analyze_language(months, article, project, lang,
+                                                          data[lang]["automated"], window)}
             plotted[lang] = {"views": article, "share": analyze.monthly_share(article, project)}
 
     ranked = sorted((lang for lang, r in languages.items() if r.get("share_growth_pct") is not None),
@@ -130,14 +138,15 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path) -> dict:
         "status": "ok",
         "topic": {"query": spec["query"], "qid": spec["qid"], "label": spec["label"],
                   "description": spec["description"]},
-        "period": {"previous": f"{months[0]}..{months[half - 1]}", "recent": f"{months[half]}..{months[-1]}",
-                   "notes": spec["notes"]},
+        "period": {"comparison": f"last {window} complete month{'s' if window > 1 else ''} vs the "
+                                 "same months a year earlier",
+                   "recent": f"{recent[0]}..{recent[-1]}", "previous": f"{previous[0]}..{previous[-1]}",
+                   "chart": f"{months[0]}..{months[-1]}", "notes": spec["notes"]},
         "languages": languages,
         "ranking_by_share_growth": ranked,
         "comparison": analyze.comparison(languages),
         "files": {},
         "limitations": LIMITATIONS,
-        "not_yet_checked": NOT_YET_CHECKED,
     }
 
     if plotted:
@@ -147,8 +156,9 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path) -> dict:
             title=f"Interest in “{spec['label']}” ({spec['qid']}) on Wikipedia",
             months=months,
             series=plotted,
-            footnote=f"Source: Wikimedia Pageviews API, monthly, agent=user. Windows: "
-                     f"{result['period']['previous']} vs {result['period']['recent']}.",
+            footnote=f"Source: Wikimedia Pageviews API, monthly, agent=user. Compared: "
+                     f"{result['period']['recent']} vs {result['period']['previous']} (same months a year earlier).",
+            compared=(previous, recent),
             order=spec["langs"],
             not_shown=not_shown,
         )

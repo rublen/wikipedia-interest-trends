@@ -122,8 +122,8 @@ def resolve(
         "method": "search",
         "decision": decision,
         "reason": reason,
-        "rule": f"auto-pick only if search result #1 is also the item with the most Wikipedia "
-                f"articles, with at least {DOMINANCE_RATIO:g}x the runner-up",
+        "rule": f"auto-pick only if the first search result with Wikipedia articles is also the "
+                f"item with the most articles, with at least {DOMINANCE_RATIO:g}x the runner-up",
         "best": _short(best),
         "runner_up": _short(runner_up) if runner_up else None,
         "ratio": ratio,
@@ -141,7 +141,9 @@ def resolve(
 
 def _decide(candidates: list[dict]) -> tuple[str, str, dict, dict | None, float | None]:
     by_links = sorted(candidates, key=lambda c: c["wikipedias"], reverse=True)
-    top, best = candidates[0], by_links[0]
+    # Items without any Wikipedia article can't be analyzed, so they don't count as "#1".
+    top = next((c for c in candidates if c["wikipedias"] > 0), candidates[0])
+    best = by_links[0]
     runner_up = by_links[1] if len(by_links) > 1 else None
     runner_count = runner_up["wikipedias"] if runner_up else 0
     ratio = round(best["wikipedias"] / runner_count, 2) if runner_count else None
@@ -151,7 +153,8 @@ def _decide(candidates: list[dict]) -> tuple[str, str, dict, dict | None, float 
         return "ambiguous", "no candidate has a Wikipedia article", best, runner_up, ratio
     if top is not best:
         return ("ambiguous",
-                f"search result #1 ({top['qid']} {top['label']}, {top['wikipedias']} Wikipedias) is not "
+                f"the first search result with articles ({top['qid']} {top['label']}, "
+                f"{top['wikipedias']} Wikipedias) is not "
                 f"the most-linked item ({best['qid']} {best['label']}, {best['wikipedias']})",
                 best, runner_up, ratio)
     if ratio is not None and ratio < DOMINANCE_RATIO:
@@ -160,7 +163,8 @@ def _decide(candidates: list[dict]) -> tuple[str, str, dict, dict | None, float 
                 f"({runner_up['qid']} {runner_up['label']}); {DOMINANCE_RATIO:g}x required",
                 best, runner_up, ratio)
     return ("auto_picked",
-            f"search result #1 is also the most-linked item, with {ratio_text} the Wikipedias of the "
+            f"the first search result with articles is also the most-linked item, with {ratio_text} "
+            f"the Wikipedias of the "
             f"runner-up" + (f" ({runner_up['qid']} {runner_up['label']})" if runner_count else ""),
             best, runner_up, ratio)
 

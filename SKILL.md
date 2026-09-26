@@ -18,7 +18,8 @@ Use full paths as written; **don't `cd`** into the skill directory.
 SKILL_DIR/setup.sh
 ```
 
-- Exit code 0: ready.
+- Exit code 0: ready. It prints the exact command prefix to use
+  (`<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py`); copy it as printed.
 - Exit code 3: neither uv nor Python 3.11+ is installed. Show the user the install
   command that `setup.sh` printed and **ask for permission** before running it.
 
@@ -30,8 +31,10 @@ SKILL_DIR/.venv/bin/python SKILL_DIR/scripts/wit.py compare "<topic in English>"
 
 - `--langs`: Wikipedia language codes, comma-separated: `uk` (Ukrainian), `pl`, `cs`
   (Czech), `de`, `en`, `es`, `pt`, `ja`… Not country codes (`ua`, `cz` are wrong).
-- `--months`: even number of complete months (default 24). The first half is the
-  "previous" window and the second half the "recent" window. "Last two years" = 24.
+- `--months N` (default 24): compares the last N complete months with **the same months
+  a year earlier** (year-on-year, so seasons cancel out). Above 12, the comparison is
+  the last 12 months vs the 12 before, and extra months only lengthen the chart history.
+  "Last two years" = 24; "this spring vs last spring" = 3 (e.g. run in June).
 - Topic in another language: add `--search-lang uk` (etc.), or translate it to English.
 - Always use `SKILL_DIR/.venv/bin/python`, never a system `python`.
 
@@ -56,18 +59,26 @@ paraphrase them or add your own explanation of why numbers differ (no "despite",
 "because", "reflects"). Don't work out directions from the `_pct` fields yourself. Structure:
 
 1. **What was measured**: the Wikidata item (label, description), the article title per
-   language, the two windows from `period`.
+   language, and `period.comparison` with the `period.recent` and `period.previous` months.
 2. **Results per language**, in `ranking_by_share_growth` order: the language's
-   `summary` (verbatim), plus `avg_monthly_views_recent` for scale. Change in share is the main
-   comparison (it removes differences in each Wikipedia's size and overall traffic).
-   With 2+ languages, add the `comparison` sentence.
+   `summary` (verbatim; it ends with the verdict, the confidence and its reasons), plus
+   `avg_monthly_views_recent` for scale. Change in share is the main comparison (it
+   removes differences in each Wikipedia's size and overall traffic). With 2+ languages,
+   add the `comparison` sentence.
 3. **Notes**: every item in `languages.<code>.notes` and `period.notes`, and any
    `no_article` languages.
-4. **Caveats**: the result has no confidence level yet (`not_yet_checked`), so call
-   the numbers indicative, and mention the key `limitations` (interest ≠ willingness to pay).
-5. **Chart**: give the path in `files.chart`. Data is in `files.data` (CSV).
+4. **Trust**: state each language's `trend.verdict` and `trend.confidence` as given.
+   If the user asks how far to trust a result, list that language's `trend.reasons`
+   (verbatim). Explain the level only with these fixed meanings:
+   - high: "the data consistently shows this; still only a signal of reader interest"
+   - medium: "probably real, but weakened by the reasons listed"
+   - low: "don't rely on this alone; check the reasons before acting"
+   Seasonality is already handled (same months a year earlier); don't cite it as a weakness.
+5. **Caveats**: mention the key `limitations` (interest ≠ willingness to pay).
+6. **Chart**: always give the path in `files.chart`; the data is in `files.data` (CSV).
 
-Keep it short. Don't claim a trend is reliable or statistically significant.
+Keep it short. Never state a higher confidence than `trend.confidence`, and don't call a
+`no_clear_change` result growth or decline.
 
 ## Follow-up questions
 

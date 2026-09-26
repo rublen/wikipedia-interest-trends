@@ -69,7 +69,7 @@ def _numbers(views, project, share, before=51273, after=37077):
 def test_summary_spells_out_signs():
     # The case Haiku misread: project_growth_pct -8.8 reported as "grew by 8.8%".
     text = analyze.summarize("pl", _numbers(-27.7, -8.8, -20.7))
-    assert "Article views fell 27.7% (51,273 -> 37,077)" in text
+    assert "Article views fell 27.7% (51,273 -> 37,077 views in total over the 12 compared months)" in text
     assert "whole pl Wikipedia shrank 8.8%" in text
     assert "share of all views fell 20.7%: it lost ground" in text
     assert "-" not in text.replace("->", "")  # no minus signs left to misread
@@ -169,7 +169,9 @@ def test_compare_pipeline_end_to_end(tmp_path):
     assert result["languages"]["pl"]["status"] == "no_article"
     cs = result["languages"]["cs"]
     assert cs["status"] == "ok" and cs["views_growth_pct"] == -50.0 and cs["share_growth_pct"] == -50.0
-    assert result["period"] == {"previous": "2024-09..2025-08", "recent": "2025-09..2026-08", "notes": []}
+    assert result["period"] == {"comparison": "last 12 complete months vs the same months a year earlier",
+                                "recent": "2025-09..2026-08", "previous": "2024-09..2025-08",
+                                "chart": "2024-09..2026-08", "notes": []}
     for name in ("chart", "data", "result"):
         assert (tmp_path / result["files"][name].split("/")[-1]).exists()
     assert json.loads((tmp_path / "result.json").read_text())["ranking_by_share_growth"] == ["cs"]
@@ -226,6 +228,24 @@ def test_colors_follow_requested_order():
     from wikitrends.chart import SERIES_COLORS, assign_colors
     assert assign_colors(["pl", "cs"])["cs"] == SERIES_COLORS[1]  # same color whether pl has data or not
     assert assign_colors(["cs"])["cs"] == SERIES_COLORS[0]
+
+
+@pytest.mark.parametrize("months, window, start, recent, previous", [
+    (6, 6, "2025-03", "2026-03..2026-08", "2025-03..2025-08"),     # 6 vs same 6 a year earlier
+    (24, 12, "2024-09", "2025-09..2026-08", "2024-09..2025-08"),
+    (36, 12, "2023-09", "2025-09..2026-08", "2024-09..2025-08"),   # extra year only for the chart
+])
+def test_months_sets_yoy_comparison_and_chart_range(tmp_path, months, window, start, recent, previous):
+    client = _fasting_client()
+    all_months = month_range("2023-09", "2026-08")
+    client.articles = {k: {m: 300 for m in all_months} for k in client.articles}
+    client.projects = {lang: {m: 70_000_000 for m in all_months} for lang in client.projects}
+    resolved = resolve(client, ["cs"], topic="fasting")
+    spec = pipeline.build_spec(client, resolved, "fasting", ["cs"], months, date(2026, 9, 25))
+    assert (spec["window"], spec["start"], spec["end"]) == (window, start, "2026-08")
+    period = pipeline.analyze_spec(client, spec, tmp_path)["period"]
+    assert (period["recent"], period["previous"]) == (recent, previous)
+    assert period["chart"] == f"{start}..2026-08"
 
 
 def test_unpublished_last_month_shifts_period():

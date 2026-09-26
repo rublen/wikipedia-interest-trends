@@ -84,7 +84,7 @@ wikipedia-interest-trends/
   `setup.sh`, stub `scripts/wit.py` + `scripts/wikitrends/`, minimal `SKILL.md`.
 - ✅ `./setup.sh && .venv/bin/python scripts/wit.py --help` works on both setup paths.
 
-### 1. MVP: answer example #1 end-to-end — built; Haiku run passed; manual check pending
+### 1. MVP: answer example #1 end-to-end — ✅ done (Haiku runs passed; manual checks in `evals/verification-log.md`)
 - **Primary path, a facade:** `wit.py compare "<topic>" --langs pl,cs --months 24`
   chains resolve → fetch → analyze → chart in one call. Fewer calls means fewer failures
   on a cheap model.
@@ -109,30 +109,41 @@ wikipedia-interest-trends/
   - At least one number is **checked by hand against pageviews.wmcloud.org**; this is
     the first entry in `evals/verification-log.md`.
 
-### 2. Trustworthy analysis: example #2
+### 2. Trustworthy analysis: example #2 — built; calibrated on real topics
 Goal: for each language, decide whether a change is real and lasting, or noise, a
-one-off event, or a data artifact. The script runs transparent checks; the agent only
-relays the result.
+one-off event, or a data artifact. The script runs transparent checks; the agent quotes
+the result.
 
-| # | Check | Question | Rule (initial thresholds, to be tuned and documented) |
+**Comparison (all checks):** the last N complete months vs **the same calendar months a
+year earlier** (year-on-year), so seasonality cancels out, for any `--months N`. Above 12,
+the comparison is 12 vs 12 and extra months only extend the chart and the history the
+checks use. Headline share = sum of article views ÷ sum of project views per period.
+
+| # | Check | Rule (as implemented in `scripts/wikitrends/trust.py`) | Cap |
 |---|---|---|---|
-| 1 | Volume | Enough data to trust? | < ~1,000 views/month → at most medium; < ~100 → low |
-| 2 | Spike vs broad growth | One event or a real shift? | Recompute growth without the largest month (and via medians); if the growth disappears → spike-driven |
-| 3 | Month-by-month consistency | Steady or random? | Count months above the same month a year earlier (e.g. 11/12 = steady, ~6/12 = noise); same-month comparison also handles seasonality |
-| 4 | Raw vs normalized agreement | Topic or whole-wiki effect? | Raw and share growth in the same direction → stronger; opposite → explain, rely on share |
-| 5 | Change vs normal noise | Big enough to matter? | Changes within the topic's usual year-to-year variation → verdict "flat / no clear change" |
-| 6 | Data artifacts | Is the series itself sound? | Article created inside the window (fake growth); renames/redirects (fake collapse); high `automated`/`spider` share; window crossing April 2020 (bot classification change) |
+| — | Verdict | `no_clear_change` if the change in share is < 10%, or smaller than the noise band **and** the sign test isn't significant; else growing / declining | — |
+| 5 | Noise | Spread of the paired year-on-year log-changes → "±X% chance alone could produce" (2 standard errors) | verdict |
+| — | Sign test | ≥ 10 of 12 changed months in one direction (one-sided p < 0.025; ties left out) also counts as a clear change | verdict |
+| 1 | Volume | Smaller of the two periods' average monthly views: < 1,000 → medium, < 100 → low | medium / low |
+| 2 | Spikes | Verdict from medians (typical months) differs from the verdict from totals → spike-driven. Spike = month > 3× the median month | low |
+| 3 | Consistency | Months in the verdict's direction vs a year earlier: ≥ 80% ok, ≥ 65% medium, else low | medium / low |
+| 4 | Raw vs share | Raw-views verdict differs from the share verdict → conclusion relies on normalization | medium |
+| 6a | New/renamed article | No views before a compared month | low |
+| 6b | Vanished article | ≥ 2 trailing zero months after normal traffic | low |
+| 6c | Level shift | Year-on-year ratio jumps ≥ 3× (3-month medians) → abrupt shift; the year is chosen by medians, the month by the largest step. Shifts in the last 3 months are "too recent to tell" | low |
+| 6d | Bots | Detected `automated` > 50% of views in a period (popular articles often have 20–45%) | medium |
+| 6e | Old data | Comparison starts before May 2020 (bot flagging) | medium |
+| — | Short comparison | Fewer than 6 months compared | medium |
 
-- Missing language editions are reported as findings ("no article in pl"), not errors.
-- **Verdict:** growing / flat / declining. **Confidence:** high / medium / low, equal to
-  the **weakest** important check, always with plain-language reasons, e.g.
-  `{"verdict": "growing", "share_growth_pct": 18.4, "confidence": "medium", "reasons": ["10 of 12 months above the same month last year", "growth holds without the largest month", "low volume: ~600 views/month"]}`.
-- Rules of thumb over black-box statistics for now: founders can challenge every reason,
-  a small model only relays them, reviewers can verify them against the raw data.
+- **Confidence** = the lowest cap; the reasons that lowered it come first. The script adds
+  "Verdict: …, with … confidence: <reasons>" to each language's `summary`.
+- Calibration (2026-09-26, 9 topics × 2–4 languages): the first version called clear
+  declines "no clear change" (noise measured within periods included seasonality and the
+  trend), capped half of all results on bot share (20% was too strict), and missed or
+  mislocated abrupt shifts (Polish "ChatGPT", April 2026). Each finding changed a rule and
+  added a regression test in `tests/test_trust.py`.
 - Every result states the limit of the method: Wikipedia interest ≠ willingness to pay
   or market size; it's a signal for choosing what to validate next.
-- Offline unit tests for every check on fixture series (steady growth, single spike,
-  seasonal, new article, low volume).
 
 ### 3. Report: example #3
 - `wit.py report` → one-page PDF (chart, key numbers, ranking, recommendation,

@@ -19,6 +19,7 @@ SURFACE = "#fcfcfb"
 TEXT_PRIMARY = "#0b0b0b"
 TEXT_SECONDARY = "#52514e"
 GRID = "#e4e3df"
+COMPARED_FILL = "#efeee9"  # recessive band behind the two compared periods
 LOG_SCALE_RATIO = 20  # raw views use a log axis when languages differ this much in size
 MAX_DIRECT_LABELS = 4
 DPI = 150
@@ -39,6 +40,7 @@ def render(
     footnote: str,
     order: list[str] | None = None,
     not_shown: dict[str, str] | None = None,
+    compared: tuple[list[str], list[str]] | None = None,
 ) -> list[str]:
     """series: {lang: {"views": {month: int}, "share": {month: float|None}}}.
 
@@ -46,6 +48,7 @@ def render(
       color when another one has no data.
     not_shown: {lang: reason} for requested languages without a line (e.g. no article);
       listed in the legend so they don't silently disappear.
+    compared: (year-earlier months, recent months) to shade; default: the two halves.
     Returns the languages that were plotted.
     """
     order = order or list(series)
@@ -56,7 +59,10 @@ def render(
         if lang not in colors:
             not_shown[lang] = f"not drawn (max {MAX_SERIES} lines)"
     x = list(range(len(months)))
-    boundary = len(months) / 2 - 0.5
+    if compared is None:
+        half = len(months) // 2
+        compared = (months[:half], months[half:])
+    spans = [(months.index(period[0]) - 0.5, months.index(period[-1]) + 0.5) for period in compared]
 
     fig, (ax_share, ax_views) = plt.subplots(2, 1, figsize=(9, 6.4), sharex=True, facecolor=SURFACE)
     fig.suptitle(title, x=0.06, y=0.975, ha="left", fontsize=13, fontweight="bold", color=TEXT_PRIMARY)
@@ -77,7 +83,10 @@ def render(
             last = next((v for v in reversed(y) if not math.isnan(v)), None)
             if last is not None:
                 line_ends[ax].append((lang, last))
-        ax.axvline(boundary, color=TEXT_SECONDARY, linewidth=0.8, linestyle=(0, (4, 3)))
+        for left, right in spans:
+            ax.axvspan(left, right, color=COMPARED_FILL, zorder=0, linewidth=0)
+        # The two periods touch when 12 months are compared; mark where the recent one starts.
+        ax.axvline(spans[1][0], color=TEXT_SECONDARY, linewidth=0.8, linestyle=(0, (4, 3)), zorder=1)
         ax.grid(axis="y", color=GRID, linewidth=0.6)
         ax.tick_params(colors=TEXT_SECONDARY, labelsize=8)
         for side in ("top", "right"):
@@ -99,8 +108,8 @@ def render(
     ax_share.set_ylim(top=max(ax_share.get_ylim()[1], 1e-3))
 
     ymax = ax_share.get_ylim()[1]
-    for text, xpos, ha in [("previous window", boundary - 0.3, "right"), ("recent window", boundary + 0.3, "left")]:
-        ax_share.text(xpos, ymax * 0.97, text, ha=ha, va="top", fontsize=8, color=TEXT_SECONDARY)
+    for text, (left, _) in zip(("year earlier", "compared months"), spans):
+        ax_share.text(left + 0.3, ymax * 0.97, text, ha="left", va="top", fontsize=8, color=TEXT_SECONDARY)
 
     step = max(1, len(months) // 8)
     ax_views.set_xticks(x[::step], months[::step])

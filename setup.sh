@@ -50,4 +50,6 @@ EOF
 fi
 
 .venv/bin/python scripts/wit.py --version >/dev/null
-echo "setup: OK - run with: .venv/bin/python scripts/wit.py --help" >&2
+# Print the exact absolute command so an agent can copy it instead of assembling paths.
+echo "setup: OK - run the skill with exactly this command prefix:" >&2
+echo "$PWD/.venv/bin/python $PWD/scripts/wit.py" >&2

@@ -16,11 +16,12 @@ def pageview_items(series: dict[str, int]) -> dict:
 class FakeClient:
     """Answers get_json from canned data: wikidata search/entities and pageview series."""
 
-    def __init__(self, search=None, entities=None, articles=None, projects=None):
+    def __init__(self, search=None, entities=None, articles=None, projects=None, automated=None):
         self.search = search or {}        # text -> [{"id", "label", "description"}]
         self.entities = entities or {}    # qid -> {"labels", "descriptions", "sitelinks"} (API shape)
         self.articles = articles or {}    # (lang, title_in_url) -> {month: views}
         self.projects = projects or {}    # lang -> {month: views}
+        self.automated = automated or {}  # (lang, title_in_url) -> {month: views}, agent=automated
         self.network_requests = 0
         self.calls: list[str] = []
 
@@ -38,8 +39,9 @@ class FakeClient:
         parts = url.split("/")
         start, end = from_api_timestamp(parts[-2]), from_api_timestamp(parts[-1])
         if "/per-article/" in url:
-            lang, title = parts[parts.index("per-article") + 1].split(".")[0], parts[-4]
-            series = self.articles.get((lang, title))
+            lang, agent, title = parts[parts.index("per-article") + 1].split(".")[0], parts[-5], parts[-4]
+            source = self.articles if agent == "user" else self.automated
+            series = source.get((lang, title))
         else:
             lang = parts[parts.index("aggregate") + 1].split(".")[0]
             series = self.projects.get(lang)

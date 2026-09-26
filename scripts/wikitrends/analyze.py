@@ -1,6 +1,8 @@
-"""Growth of raw views and of normalized share, previous window vs recent window."""
+"""Growth of raw views and of normalized share: last N months vs the same months a year earlier."""
 
 from __future__ import annotations
+
+from wikitrends import trust
 
 PER_MILLION = 1_000_000
 
@@ -24,10 +26,14 @@ def _round_share(value: float | None) -> float | None:
 
 
 def analyze_language(months: list[str], article: dict[str, int], project: dict[str, int],
-                     lang: str = "this") -> dict:
-    """Compare the first half of `months` (previous window) with the second half (recent window)."""
-    half = len(months) // 2
-    previous, recent = months[:half], months[half:]
+                     lang: str = "this", automated: dict[str, int] | None = None,
+                     window: int = trust.YEAR) -> dict:
+    """Compare the last `window` months with the same calendar months a year earlier.
+
+    `months` is the whole fetched period (at least window + 12 months); months before the
+    compared ones only feed the chart and the trust checks.
+    """
+    previous, recent = trust.windows(months, window)
     a_prev = sum(article[m] for m in previous)
     a_recent = sum(article[m] for m in recent)
     p_prev = sum(project[m] for m in previous)
@@ -36,16 +42,17 @@ def analyze_language(months: list[str], article: dict[str, int], project: dict[s
     s_recent = share_per_million(a_recent, p_recent)
 
     notes = []
+    compared = previous + recent
     with_data = [m for m in months if article[m] > 0]
     first_with_data = with_data[0] if with_data else None
     if not with_data:
         notes.append("no recorded views in the whole period")
-    elif first_with_data > months[0]:
+    elif first_with_data > compared[0]:
         notes.append(f"no views before {first_with_data} (article may be new or renamed); "
                      "growth may be overstated")
     if a_prev == 0 and a_recent > 0:
-        notes.append("no views in the previous window, so growth is undefined")
-    missing_totals = [m for m in months if project[m] == 0]
+        notes.append("no views in the year-earlier months, so growth is undefined")
+    missing_totals = [m for m in compared if project[m] == 0]
     if missing_totals:
         notes.append(f"project totals missing for {', '.join(missing_totals)}")
 
@@ -54,6 +61,7 @@ def analyze_language(months: list[str], article: dict[str, int], project: dict[s
         "views_recent": a_recent,
         "views_growth_pct": growth_pct(a_prev, a_recent),
         "avg_monthly_views_recent": round(a_recent / len(recent)),
+        "months_compared": len(recent),
         "share_per_million_previous": _round_share(s_prev),
         "share_per_million_recent": _round_share(s_recent),
         "share_growth_pct": growth_pct(s_prev, s_recent) if s_prev is not None and s_recent is not None else None,
@@ -61,7 +69,10 @@ def analyze_language(months: list[str], article: dict[str, int], project: dict[s
         "first_month_with_data": first_with_data,
         "notes": notes,
     }
-    return {"summary": summarize(lang, result), **result}
+    trend = trust.assess(months, article, project, result["share_growth_pct"],
+                         result["views_growth_pct"], automated, window)
+    summary = summarize(lang, result) + " " + trust.sentence(trend)
+    return {"summary": summary, "trend": trend, **result}
 
 
 # Changes smaller than this (in %) are described as "about the same".
@@ -83,7 +94,9 @@ def summarize(lang: str, r: dict) -> str:
     if views is None or share is None or project is None:
         return "The article had no views in the previous window, so growth can't be computed."
 
-    text = (f"Article views {_change(views)} ({r['views_previous']:,} -> {r['views_recent']:,}). "
+    n = r.get("months_compared", 12)
+    text = (f"Article views {_change(views)} ({r['views_previous']:,} -> {r['views_recent']:,} views "
+            f"in total over the {n} compared month{'s' if n > 1 else ''}). "
             f"The whole {lang} Wikipedia {_change(project, 'grew', 'shrank')} over the same time, "
             f"so the article's share of all views {_change(share)}")
     if abs(share) < UNCHANGED_PCT:
@@ -103,7 +116,12 @@ def comparison(languages: dict[str, dict]) -> str | None:
                      if r.get("share_growth_pct") is not None), key=lambda x: x[1], reverse=True)
     if len(ranked) < 2:
         return None
-    parts = [f"{lang} (share {_change(pct)})" for lang, pct in ranked]
+    parts = []
+    for lang, pct in ranked:
+        trend = languages[lang].get("trend")
+        suffix = (f", {trend['verdict'].replace('_', ' ')} with {trend['confidence']} confidence"
+                  if trend else "")
+        parts.append(f"{lang} (share {_change(pct)}{suffix})")
     return "Ranked by change in share of attention, best first: " + ", ".join(parts) + "."
 
 

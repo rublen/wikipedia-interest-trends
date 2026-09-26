@@ -54,8 +54,8 @@ def parse_months(value: str) -> int:
         months = int(value)
     except ValueError:
         raise argparse.ArgumentTypeError("--months must be an integer") from None
-    if months < 2 or months % 2:
-        raise argparse.ArgumentTypeError("--months must be an even number >= 2 (it is split into two equal windows)")
+    if months < 1:
+        raise argparse.ArgumentTypeError("--months must be at least 1")
     return months
 
 
@@ -139,7 +139,9 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--langs", required=True, type=parse_langs,
                        help="comma-separated Wikipedia language codes, e.g. pl,cs,uk")
         p.add_argument("--months", type=parse_months, default=24,
-                       help="period length in complete months, split into previous/recent halves (default 24)")
+                       help="last N complete months, compared with the same months a year earlier; "
+                            "above 12, the comparison is the last 12 months and the rest only extends "
+                            "the chart (default 24)")
         p.add_argument("--search-lang", default="en", help="language the topic is written in (default en)")
         p.add_argument("--out", help="output directory (default: output/<qid>-<label>/)")
 

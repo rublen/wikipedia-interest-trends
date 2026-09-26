@@ -22,9 +22,11 @@ def _series(items: list[dict], start: str, end: str) -> dict[str, int]:
     return {month: views.get(month, 0) for month in month_range(start, end)}
 
 
-def article_monthly(client: Client, lang: str, title: str, start: str, end: str, last_complete: str) -> dict[str, int]:
+def article_monthly(client: Client, lang: str, title: str, start: str, end: str, last_complete: str,
+                    agent: str = "user") -> dict[str, int]:
+    """agent: 'user' (default) or 'automated' (bots detected by Wikimedia since April 2020)."""
     article = quote(title.replace(" ", "_"), safe="")
-    url = (f"{PAGEVIEWS_API}/per-article/{lang}.wikipedia/all-access/user/{article}"
+    url = (f"{PAGEVIEWS_API}/per-article/{lang}.wikipedia/all-access/{agent}/{article}"
            f"/monthly/{api_start(start)}/{api_end(end)}")
     try:
         items = client.get_json(url, ttl=_ttl(end, last_complete))["items"]
