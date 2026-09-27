@@ -152,11 +152,15 @@ def recommendation(ranking: dict) -> list[str]:
     if all(r["verdict"] == "declining" for r in top):
         lines.append("Interest is declining in the top-ranked languages too: the ranking only shows "
                      "where it declines least, not where it grows.")
-    rest = [r["lang"] for r in rows[len(top):]]
+    rest = rows[len(top):]
     if rest:
-        lines.append(f"Lower priority on this evidence: {', '.join(rest)}.")
+        # A plain list: per-language reasons here made the line long, and agents paraphrased
+        # long lines instead of quoting them (each language's `why` has the details).
+        lines.append(f"Lower priority on this evidence: {', '.join(r['lang'] for r in rest)}.")
     if not_measured:
         lines.append(not_measured)
+    lines.append("Audiences here are the readers of each language's Wikipedia, not countries: "
+                 "one language is often read in many countries.")
     w = ranking["weights"]
     lines.append(f"Ranking weights: momentum {w['momentum']:g}, size {w['size']:g}, confidence "
                  f"{w['confidence']:g}; momentum and size are scaled 0-1 within these languages, so "

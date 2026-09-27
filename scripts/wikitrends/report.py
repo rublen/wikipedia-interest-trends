@@ -165,6 +165,10 @@ def _render(path, result, months, plotted, compared, order, lang_names, question
             line = line.split(". ", 1)[0] + " (details in the table above and the reasons below)."
         elif line.startswith("Ranking weights:"):
             continue  # stated in "How the ranking works"
+        elif line.startswith("Lower priority on this evidence:"):
+            # Reasons per language are in the trust section; keep the PDF line short.
+            line = "Lower priority on this evidence: " + ", ".join(
+                r["lang"] for r in ranking["languages"][2:]) + "."
         page.text("• " + line, gap=0.002)
 
     # Trust: the meaning of each level once, then each language's main reasons.

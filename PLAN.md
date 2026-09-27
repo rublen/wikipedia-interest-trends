@@ -158,6 +158,31 @@ checks use. Headline share = sum of article views ÷ sum of project views per pe
 - Transparent, user-adjustable ranking (`--weights`): momentum (only confirmed changes count),
   size (log views) and confidence; a code-written `why` per language and `recommendation`.
 
+### Tuning on cheap models: stopping criterion and what it taught
+
+**Stopping criterion (set 2026-09-27, before the next batch):** stop tuning the answer format
+when **all critical rubric items pass in ≥ 4 of 5 runs of example #3**, with no critical
+failure in the example #1 and #2 regression runs. Then move on to a **holdout set** of new
+scenarios the format was never tuned on, and to the roadmap. Reason: several batches were
+tuned against the same three prompts, which risks overfitting to them, the same risk as
+calibrating thresholds on a few topics.
+
+**Findings (design principles for agent-facing output), each backed by scored runs in
+`evals/cheap-model-runs.md`:**
+1. **Short, atomic sentences get quoted; long text gets paraphrased, and errors enter in the
+   paraphrase.** Every code-written sentence that was quoted stayed correct; failures appeared
+   in the model's own wording around the quotes, and more often when the text to quote grew.
+2. **Never hand the model data it has to compare or rank itself.** A line listing views per
+   month without the size rank led two runs to call the second-smallest audience "the smallest".
+   Give ranks, directions and comparisons already computed.
+3. **Signs get misread and noise-level directions get over-read.** "-8.8" became "grew 8.8%";
+   "rose 1.6%" (inside the noise) became "growing". Hence words instead of signs, and no
+   direction for a "no clear change" (see the two output channels above).
+4. **Anything left undefined gets an invented meaning.** "Medium confidence" became "weak
+   signal" and "real enough to act on" until the script wrote the meaning next to the level.
+5. **Name the metric in every sentence.** "10 of 12 months were below" became "months with
+   fewer views" (the count is on the share) in three runs, until the reason said "the share".
+
 ### 4. Follow-ups & efficiency
 - On-disk cache + reuse of the query spec, so "add Slovak" or "same for 5 years" are
   cheap.

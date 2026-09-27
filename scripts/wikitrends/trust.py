@@ -232,13 +232,16 @@ def assess(months: list[str], article: dict[str, int], project: dict[str, int],
     if verdict in ("growing", "declining"):
         frac = agree / n
         checks["months_in_trend_direction"] = f"{agree}/{n}"
-        text = f"{agree} of {n} months were {'above' if up else 'below'} the same month a year earlier"
+        # Say "share" explicitly: agents turned "months were below" into "months had fewer views".
+        text = (f"the share was {'higher' if up else 'lower'} than in the same month a year earlier "
+                f"in {agree} of {n} months")
         if frac >= CONSISTENT_HIGH:
             conf.support.append(text)
         elif frac >= CONSISTENT_MEDIUM:
-            conf.cap("medium", "only " + text)
+            conf.cap("medium", text.replace(f"in {agree} of", f"in only {agree} of"))
         else:
-            conf.cap("low", "only " + text + ", so the direction is not consistent")
+            conf.cap("low", text.replace(f"in {agree} of", f"in only {agree} of")
+                     + ", so the direction is not consistent")
 
     # 4. Raw vs share.
     raw_verdict = _verdict(views_growth_pct)
@@ -285,8 +288,9 @@ def assess(months: list[str], article: dict[str, int], project: dict[str, int],
         worst = max(bot_shares)
         checks["automated_share_max_pct"] = round(worst * 100, 1)
         if worst > BOT_SHARE_MEDIUM:
-            conf.cap("medium", f"{worst:.0%} of views in one period came from detected bots; "
-                               "undetected bots may also be counted as users")
+            conf.cap("medium", f"{worst:.0%} of all views in one period were detected bots, which are "
+                               "already excluded from these numbers; a share that high suggests some "
+                               "undetected bots may still be counted as users")
     if compared[0] < BOT_FLAGGING_FROM:
         conf.cap("medium", "the comparison starts before May 2020, when Wikimedia began flagging "
                            "disguised bots; earlier 'user' views include more bot traffic")

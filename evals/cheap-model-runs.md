@@ -313,3 +313,117 @@ Evidence:
   go decision; the overall recommendation is "validate demand in German and Vietnamese".
 - The fixes for signs, directions, proxy and weights held: G5 5/5 (was 2/5), E3a 3/3 (was 1/3),
   E3c weights stated 3/3 (was 0/3), G9 4/5 (was 1/5).
+
+## 2026-09-27 — After three data fixes for G8: example #3 ×3, regressions #2 ×1 and #1 ×1, Claude Haiku 4.5
+
+Fixes: the bot reason says detected bots are "already excluded from these numbers"; a
+recommendation line says audiences are language communities, not countries; the "Lower
+priority" line gives each language a short reason (verdict, views/month, confidence and its
+first reason).
+
+Runs: `runs/2026-09-27-haiku-ex3-run7.md`, `-run8.md`, `-run9.md`, `runs/2026-09-27-haiku-ex2-run11.md`,
+`runs/2026-09-27-haiku-ex1-run6.md`. All: 5 turns, 22–30 s, $0.027–0.053, no tool errors.
+
+| Item | Severity | #3 r7 | #3 r8 | #3 r9 | #2 r11 | #1 r6 | Count | Previous batch |
+|---|---|---|---|---|---|---|---|---|
+| G1 Uses the skill | critical | pass | pass | pass | pass | pass | 5/5 | 5/5 |
+| G2 Right topic | critical | pass | pass | pass | pass | pass | 5/5 | 5/5 |
+| G3 Numbers from the JSON | critical | **fail** | **fail** | pass | pass | pass | 3/5 | 4/5 |
+| G4 Units | critical | pass | pass | pass | **fail** | pass | 4/5 | 5/5 |
+| G5 Directions | critical | pass | **fail** | pass | pass | pass | 4/5 | 5/5 |
+| G6 Verdict and confidence | critical | pass | **fail** | pass | pass | pass | 4/5 | 5/5 |
+| G7 Confidence meaning quoted | minor | **fail** | pass | **fail** | **fail** | pass | 2/5 | 4/5 |
+| G8 No invented reasons | critical | **fail** | pass (note) | **fail** | **fail** | pass | 2/5 | 2/5 |
+| G9 Scope quoted once | minor | **fail** | pass | pass | **fail** | **fail** | 2/5 | 4/5 |
+| G10 Next checks, not go/no-go | critical | **fail** | pass | **fail** | pass | n/a | 2/4 | 4/4 |
+| G11 Chart path | minor | pass | pass | pass | **fail** | pass | 4/5 | 5/5 |
+| E1a / E2a | critical | – | – | – | pass | pass | 2/2 | 2/2 |
+| E3a Proxy stated | critical | pass | pass | pass | – | – | 3/3 | 3/3 |
+| E3b Report made and given | critical | pass | pass | pass | – | – | 3/3 | 3/3 |
+| E3c Recommendation quoted + weights | minor | **fail** | **fail** | **fail** | – | – | 0/3 | 2/3 |
+| **All items passed** | | no | no | no | no | no | **0/5** | 2/5 |
+| **All critical items passed** | | no | no | no | no | yes | **1/5** | 2/5 |
+
+Failures by severity: critical 10 (previous 4), minor 10 (previous 3). **A regression.**
+
+What the targeted fixes did:
+- Countries: fixed (0/3 runs used country names; previous batch 1/3).
+- Bots: 2/3 now correct ("suggests some undetected bots remain"); r7 still says the bot share
+  "may inflate or distort the signal".
+- Lower-priority reasons: the models still added their own: r7 "market saturation, app
+  availability"; r9 "a ready market to test", "riskier to enter now".
+
+New and repeated failures:
+- **G3 (r7, r8):** "Turkish (stable, smallest audience)"; Ukrainian is the smallest. The new
+  "Lower priority" line gives views/month but no size rank, and both runs inferred it wrongly.
+- **G5, G6 (r8):** "Japanese (stable in share but declining overall)" (its share fell 11.0%);
+  "Polish and Portuguese (declining; low confidence)" (Polish is medium).
+- **G10 (r7, r9):** "strongest expansion candidates", "may still justify entry", "riskier to enter now".
+- **G7, G9, E3c:** more paraphrasing than before in 3–4 of 5 runs; E3c 0/3.
+- **G4 (#2 r11):** "10 out of 12 months showed fewer **views**" (the check counts share); the third
+  run with this exact slip (after ex2 run5 and ex1 run4).
+
+Reading: the answers got longer and more paraphrased. One plausible cause is that the
+recommendation grew (six per-language reasons plus the audiences line), and a longer text to
+quote is paraphrased more. Run-to-run variance with 3 runs per scenario is also large, so this
+batch alone can't separate the two.
+
+## 2026-09-27 — Controlled test: short recommendation + "share" wording; example #3 ×5, #2 ×1, #1 ×1
+
+Stopping criterion (set in `PLAN.md` before this batch): all critical items pass in ≥ 4 of 5
+runs of example #3, with no critical failure in the #1 and #2 regression runs.
+
+Changes (two only): the "Lower priority" line is a plain list again (the per-language reasons
+from the previous batch are removed; the bot and countries fixes stay); the consistency reason
+names the metric ("the share was lower than in the same month a year earlier in 10 of 12 months").
+
+Runs: `runs/2026-09-27-haiku-ex3-run10.md` … `-run14.md`, `runs/2026-09-27-haiku-ex2-run12.md`,
+`runs/2026-09-27-haiku-ex1-run7.md`. All: 4–5 turns, 18–30 s, $0.025–0.042, no tool errors.
+Answer length for #3: median 371 words (previous batch: 537).
+
+| Item | Severity | #3 r10 | #3 r11 | #3 r12 | #3 r13 | #3 r14 | #2 r12 | #1 r7 | Count |
+|---|---|---|---|---|---|---|---|---|---|
+| G1 Uses the skill | critical | pass | pass | pass | pass | pass | pass | pass | 7/7 |
+| G2 Right topic | critical | pass | pass | pass | pass | **fail** | pass | pass | 6/7 |
+| G3 Numbers from the JSON | critical | pass | pass | pass | **fail** | pass | pass | pass | 6/7 |
+| G4 Units | critical | pass | pass | pass | **fail** | pass | pass | pass | 6/7 |
+| G5 Directions | critical | **fail** | **fail** | pass | **fail** | pass | pass | pass | 4/7 |
+| G6 Verdict and confidence | critical | pass | pass | pass | pass | pass | pass | pass | 7/7 |
+| G7 Confidence meaning quoted | minor | **fail** | **fail** | **fail** | pass | pass | pass | pass | 4/7 |
+| G8 No invented reasons | critical | pass | pass | **fail** | pass | pass | **fail** | pass | 5/7 |
+| G9 Scope quoted once | minor | pass | pass | **fail** | pass | pass | **fail** | pass | 5/7 |
+| G10 Next checks, not go/no-go | critical | pass | pass | pass | pass | pass | pass | n/a | 6/6 |
+| G11 Chart path | minor | pass | pass | pass | pass | pass | **fail** | pass | 6/7 |
+| E1a / E2a | critical | – | – | – | – | – | pass | pass | 2/2 |
+| E3a Proxy stated | critical | pass | pass | pass | pass | **fail** | – | – | 4/5 |
+| E3b Report made and given | critical | pass | pass | pass | pass | pass | – | – | 5/5 |
+| E3c Recommendation quoted + weights | minor | **fail** | **fail** | **fail** | **fail** | pass | – | – | 1/5 |
+| **All items passed** | | no | no | no | no | no | no | yes | **1/7** |
+| **All critical items passed** | | no | no | no | no | no | no | yes | **1/7** |
+
+**Stopping criterion: not met** (#3 critical pass 0/5; #2 regression failed on G8).
+
+Evidence:
+- **G5 (r10, r11, r13): cross-language grouping done by the model.** r10: "All six others show
+  declining interest (Polish, Spanish, Portuguese, **Turkish**, Ukrainian…)"; Turkish is "no
+  clear change". r11: "Vietnamese offers high-confidence **growth**". r13: "Japanese … losing
+  mindshare **fastest**" (Ukrainian fell most) and "Portuguese and Spanish also show **stable**
+  patterns".
+- **G3, G4 (r13):** "German … the **only** cohort member holding attention steady" (vi and tr are
+  stable too); "Turkish … **smallest** audience" (Ukrainian is); "10–15 **percentage point** drops"
+  (they are percent changes).
+- **G2, E3a (r14):** searched "Learning English", accepted the auto-picked Voice of America
+  programme ("The 'Learning English' article (Voice of America's simplified English program)")
+  and ran the whole analysis on it, although `SKILL.md` names this exact case.
+- **G8:** r12 "Ukrainian … steepest decline, **suggesting the smallest addressable audience**";
+  #2 r12 "**a few schools adding/removing the article to curricula** could shift these numbers".
+- **G7 (r11):** gave German's *medium* level the *high* meaning ("the data consistently shows this").
+- **Held:** G4 "views vs share" is fixed at the source (both regression runs: "the share was lower
+  than a year earlier in … months"); no country names; no "numbers inflated by bots"; G10 6/6.
+
+Reading: shortening worked on length, not on errors. Nearly every remaining critical failure in
+#3 is a statement *across languages* that the model worked out itself: which languages are
+stable or declining, which is smallest, which fell fastest, which is the "only" one. No field
+states these, so the model computes them from eight per-language entries and gets them wrong.
+That is principle 2 ("never hand the model data it has to compare or rank") at the level of the
+whole answer.

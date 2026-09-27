@@ -30,6 +30,7 @@ def test_steady_growth_is_high_confidence():
     t = assess(series([5000 * w for w in WOBBLE], [6500 * w for w in WOBBLE]))
     assert (t["verdict"], t["confidence"]) == ("growing", "high")
     assert t["checks"]["months_in_trend_direction"] == "12/12"
+    assert "the share was higher than in the same month a year earlier in 12 of 12 months" in t["reasons"]
 
 
 def test_small_change_is_no_clear_change():
@@ -86,6 +87,7 @@ def test_heavy_bot_traffic_caps_at_medium():
     t = assess(article, automated={m: v * 1.5 for m, v in article.items()})
     assert t["confidence"] == "medium"
     assert t["checks"]["automated_share_max_pct"] == 60.0
+    assert any("already excluded from these numbers" in r for r in t["reasons"])
 
 
 def test_period_before_bot_flagging_caps_at_medium():

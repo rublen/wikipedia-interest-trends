@@ -69,6 +69,9 @@ def test_recommendation_cases():
     assert lines[0].startswith("Explore next: a and b.")
     assert any(line.startswith("Check before relying on it: b") for line in lines)
     assert any("only shows where it declines least" in line for line in lines)
+    assert "Lower priority on this evidence: c." in lines
+    assert any(line.startswith("Audiences here are the readers of each language's Wikipedia, not countries")
+               for line in lines)
     assert lines[-1].startswith("Ranking weights: momentum 0.4, size 0.4, confidence 0.2")
 
 
