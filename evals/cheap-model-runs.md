@@ -215,3 +215,50 @@ Reading: every failure is a single occurrence, and each is a different item, so 
 systematic yet. What held in 4/4: numbers, directions, verdicts, and no invented reasons,
 which are the items the script-written sentences were meant to protect. The fails are
 all in the model's *own* sentences around the quotes (openers, labels, omissions).
+
+## 2026-09-27 — Iteration 3 batch: example #3 ×3 (report), regressions #2 ×1 and #1 ×1, Claude Haiku 4.5
+
+New in this batch: `ranking`, `recommendation` and `--report/--question/--note/--weights`.
+Prompt #3: "We're building a language-learning app. Compare interest in learning English in our
+chosen language editions: Ukrainian, Polish, German, Spanish, Portuguese, Turkish, Japanese and
+Vietnamese. Prepare a short report: which audiences should we explore next, and why?"
+
+Runs: `runs/2026-09-27-haiku-ex3-run1.md`, `-run2.md`, `-run3.md`, `runs/2026-09-27-haiku-ex2-run9.md`,
+`runs/2026-09-27-haiku-ex1-run4.md`. All: 5 turns, 20–31 s, $0.027–0.047, no tool errors.
+All three #3 runs chose on their own `compare "English language" … --report --question … --note "Proxy: …"`.
+
+| Item | #3 r1 | #3 r2 | #3 r3 | #2 r9 | #1 r4 | Count |
+|---|---|---|---|---|---|---|
+| G1 Uses the skill | pass | pass | pass | pass | pass | 5/5 |
+| G2 Right topic | pass | pass | pass | pass | pass | 5/5 |
+| G3 Numbers from the JSON | pass | pass | pass | pass | pass | 5/5 |
+| G4 Units | pass | pass | pass | pass | **fail** | 4/5 |
+| G5 Directions | **fail** | **fail** | **fail** | pass | pass | 2/5 |
+| G6 Verdict and confidence | pass | pass | **fail** | pass | pass | 4/5 |
+| G7 Confidence meaning quoted | **fail** | pass | **fail** | pass | pass | 3/5 |
+| G8 No invented reasons | **fail** | **fail** | pass | pass | pass | 3/5 |
+| G9 Scope quoted once | **fail** | pass | **fail** | **fail** | **fail** | 1/5 |
+| G10 Next checks, not go/no-go | pass | **fail** | pass | pass | pass | 4/5 |
+| G11 Chart path | pass | pass | pass | pass | pass | 5/5 |
+| E1a / E2a | – | – | – | pass | pass | 2/2 |
+| E3a Proxy stated in the answer | **fail** | **fail** | pass | – | – | 1/3 |
+| E3b Report made and given | pass | pass | pass | – | – | 3/3 |
+| E3c Recommendation quoted + weights stated | **fail** | **fail** | **fail** | – | – | 0/3 |
+
+Evidence:
+- **G5 (3/3 on #3):** vi is "no clear change" (share +1.6%), but r1 says "interest is holding
+  steady **or growing**", r3 "the only market where English-language interest **actually grew**";
+  r2 says ja is "declining against **platform growth**" (the ja Wikipedia shrank 4.4%).
+- **G9 (1/5, down from 3/4):** four runs paraphrased the *old* first `limitations` line
+  ("measure curiosity among Wikipedia readers…") instead of quoting `scope`. The JSON contains
+  both, nearly identical, and the model picks either.
+- **E3c (0/3):** no run stated the ranking weights; r2 and r3 rewrote the recommendation.
+- **G8, G10 (r1, r2):** own business reasons: "Ranked #1 **for investment**", "the **safer bet**",
+  "**underserved demand**", "**competitive pressure**", "validate whether this reflects
+  **seasonal patterns**".
+- **G6 (r3):** "Spanish, Polish, Portuguese, Ukrainian: all declining with either medium or low
+  confidence"; uk is high.
+- **G4 (#1 r4):** "11 of 12 months showed lower **views**" (the check counts share); same slip as ex2 run5.
+- **E3a:** the proxy note is in all three PDFs (`--note`), but only r3 said it in the answer.
+- Also found: the `comparison` sentence still has signed numbers for tiny changes: "share stayed
+  about the same **(-0.7%)**".

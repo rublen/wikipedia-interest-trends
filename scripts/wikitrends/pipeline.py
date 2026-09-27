@@ -8,11 +8,12 @@ import re
 from datetime import date
 from pathlib import Path
 
-from wikitrends import analyze, chart, trust
+from wikitrends import analyze, chart, ranking, report, trust
 from wikitrends.api import Client
 from wikitrends.config import OUTPUT_DIR
 from wikitrends.months import FIRST_AVAILABLE, add_months, last_complete_month, month_range
 from wikitrends.pageviews import article_monthly, project_monthly
+from wikitrends.resolve import language_names
 
 SPEC_VERSION = 2  # 2: year-on-year comparison window
 
@@ -28,7 +29,7 @@ LIMITATIONS = [
 ]
 # Files analyze_spec writes; removed at the start of each run so none can be left over
 # from an earlier run with different languages (query.json is written by the caller).
-GENERATED_FILES = ("chart.png", "monthly.csv", "result.json")
+GENERATED_FILES = ("chart.png", "monthly.csv", "result.json", "report.pdf")
 
 
 
@@ -108,7 +109,15 @@ def fetch(client: Client, spec: dict) -> dict[str, dict]:
     return data
 
 
-def analyze_spec(client: Client, spec: dict, out_dir: Path) -> dict:
+def reproduce_command(spec: dict, weights: dict[str, float]) -> str:
+    cmd = f"wit.py compare --qid {spec['qid']} --langs {','.join(spec['langs'])} --months {spec['months']}"
+    if weights != ranking.parse_weights(None):
+        cmd += " --weights " + ",".join(f"{k}={v:g}" for k, v in weights.items())
+    return cmd + " --report"
+
+
+def analyze_spec(client: Client, spec: dict, out_dir: Path, weights: dict[str, float] | None = None,
+                 make_report: bool = False, question: str | None = None, note: str | None = None) -> dict:
     months = month_range(spec["start"], spec["end"])
     window = spec["window"]
     previous, recent = trust.windows(months, window)
@@ -149,6 +158,8 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path) -> dict:
         "languages": languages,
         "ranking_by_share_growth": ranked,
         "comparison": analyze.comparison(languages),
+        "ranking": ranking.rank(languages, weights or ranking.parse_weights(None)),
+        "recommendation": [],
         "scope": SCOPE,
         "files": {},
         "limitations": LIMITATIONS,
@@ -174,6 +185,17 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path) -> dict:
                                              f"not drawn: {', '.join(skipped)}")
     else:
         result["period"]["notes"].append("no chart: none of the languages has an article to plot")
+
+    result["recommendation"] = ranking.recommendation(result["ranking"])
+    if make_report:
+        report_path = out_dir / "report.pdf"
+        fits = report.render(report_path, result, months, plotted, (previous, recent), spec["langs"],
+                             language_names(client), question, note,
+                             reproduce_command(spec, result["ranking"]["weights"]))
+        result["files"]["report"] = str(report_path)
+        if not fits:
+            result["period"]["notes"].append("report: not everything fit on one page; "
+                                             "compare fewer languages for a complete report")
 
     csv_path = out_dir / "monthly.csv"
     _write_csv(csv_path, months, data)

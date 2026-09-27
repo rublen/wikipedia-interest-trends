@@ -38,6 +38,25 @@ SKILL_DIR/.venv/bin/python SKILL_DIR/scripts/wit.py compare "<topic in English>"
 - Topic in another language: add `--search-lang uk` (etc.), or translate it to English.
 - Always use `SKILL_DIR/.venv/bin/python`, never a system `python`.
 
+**Broad intents** ("learning English", "interest in astronomy courses") rarely have an
+article of their own. Use the most widely available article that stands for the interest
+(e.g. `--qid Q1860`, the English language, rather than "English as a second language",
+which exists in few languages) and say it is a proxy, both in the answer and in `--note`.
+
+### Reports and rankings
+
+When the user asks for a report, something to share, or "which audiences/languages to
+explore next", add:
+
+- `--report`: also writes a one-page PDF (`files.report`).
+- `--question "<the user's question>"`: the report's title.
+- `--note "<what the article stands for>"`, e.g. "Proxy: the article on the English
+  language, read in each audience's own language."
+- `--weights momentum=0.4,size=0.4,confidence=0.2` (the default): change only if the user
+  states priorities, e.g. "bigger markets matter most" → `size=0.6,momentum=0.2,confidence=0.2`.
+  Momentum = change in share (a "no clear change" counts as 0), size = average monthly
+  views, confidence = the trust level. Scores rank only the compared languages.
+
 ## Read the `status` field first
 
 | status | What to do |
@@ -72,9 +91,13 @@ paraphrase them or add your own explanation of why numbers differ (no "despite",
    If the user asks how far to trust a result, list that language's `trend.reasons`
    (verbatim). Seasonality is already handled (same months a year earlier); don't cite
    it as a weakness.
-5. **Scope**: quote the top-level `scope` sentence once, verbatim. Add other
+5. **Which to explore next** (when asked): quote the `recommendation` lines verbatim.
+   They come from `ranking` (score, components and `why` per language); say which
+   `ranking.weights` were used.
+6. **Scope**: quote the top-level `scope` sentence once, verbatim. Add other
    `limitations` only if they matter for this question.
-6. **Chart**: always give the path in `files.chart`; the data is in `files.data` (CSV).
+7. **Files**: always give the path in `files.chart`, and `files.report` if one was made;
+   the data is in `files.data` (CSV).
 
 Keep it short. Never state a higher confidence than `trend.confidence`, and don't call a
 `no_clear_change` result growth or decline. Recommendations are about **what to check
@@ -83,7 +106,8 @@ interest alone can't decide that.
 
 ## Follow-up questions
 
-Rerun `compare` with the changed languages, period or topic. Downloads are cached, so
-reruns are fast. For the same topic, reuse the `--qid` from the previous result.
+Rerun `compare` with the changed languages, period, topic or weights (add `--report`
+again if the user wants an updated report). Downloads are cached, so reruns are fast.
+For the same topic, reuse the `--qid` from the previous result.
 
 Debugging only: `resolve` (writes `query.json`), `fetch --spec`, `analyze --spec`.

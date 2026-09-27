@@ -26,15 +26,32 @@ def wikipedia_sites(client: Client) -> set[str]:
     Sitelinks also point to sister projects whose ids look alike (e.g. 'abstractwiki',
     'commonswiki'), so an id pattern is not enough to tell which ones are Wikipedias.
     """
-    data = client.get_json(SITEMATRIX_API, {
-        "action": "sitematrix", "smtype": "language", "smlangprop": "code|site",
-        "smsiteprop": "dbname|code", "smstate": "all", "format": "json", "formatversion": 2,
-    }, ttl=SITEMATRIX_TTL)
     return {
         site["dbname"]
-        for key, language in data["sitematrix"].items() if key != "count"
+        for key, language in _sitematrix(client).items() if key != "count"
         for site in language.get("site", []) if site.get("code") == "wiki"
     }
+
+
+def language_names(client: Client) -> dict[str, str]:
+    """Wikipedia language code -> English name, e.g. 'uk' -> 'Ukrainian'."""
+    names = {}
+    for key, language in _sitematrix(client).items():
+        if key == "count":
+            continue
+        for site in language.get("site", []):
+            if site.get("code") == "wiki":
+                lang = site["dbname"][:-len("wiki")].replace("_", "-")
+                names[lang] = language.get("localname") or language.get("name") or lang
+    return names
+
+
+def _sitematrix(client: Client) -> dict:
+    return client.get_json(SITEMATRIX_API, {
+        "action": "sitematrix", "smtype": "language", "smlangprop": "code|site|localname",
+        "smsiteprop": "dbname|code", "smstate": "all", "uselang": "en", "format": "json",
+        "formatversion": 2,
+    }, ttl=SITEMATRIX_TTL)["sitematrix"]
 
 
 def count_wikipedias(sitelinks: dict, wikipedias: set[str]) -> int:

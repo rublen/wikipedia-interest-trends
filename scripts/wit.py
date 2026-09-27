@@ -14,7 +14,7 @@ import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from wikitrends import __version__, pipeline
+from wikitrends import __version__, pipeline, ranking
 from wikitrends.api import ApiError, Client
 from wikitrends.resolve import resolve
 
@@ -59,6 +59,17 @@ def parse_months(value: str) -> int:
     return months
 
 
+def parse_weights(value: str) -> dict[str, float]:
+    try:
+        return ranking.parse_weights(value)
+    except ranking.WeightsError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from None
+
+
+def _report_options(args: argparse.Namespace) -> dict:
+    return {"weights": args.weights, "make_report": args.report, "question": args.question, "note": args.note}
+
+
 def _resolve_and_spec(args: argparse.Namespace, client: Client) -> tuple[dict, dict | None]:
     if not args.topic and not args.qid:
         raise argparse.ArgumentTypeError("give a topic or --qid")
@@ -77,7 +88,7 @@ def cmd_compare(args: argparse.Namespace, client: Client) -> int:
     out_dir = Path(args.out) if args.out else pipeline.default_out_dir(spec)
     spec_path = out_dir / "query.json"
     pipeline.write_json(spec_path, spec)
-    result = pipeline.analyze_spec(client, spec, out_dir)
+    result = pipeline.analyze_spec(client, spec, out_dir, **_report_options(args))
     result["topic"]["resolution"] = resolved["resolution"]
     result["files"]["spec"] = str(spec_path)
     emit(result)
@@ -118,7 +129,7 @@ def cmd_analyze(args: argparse.Namespace, client: Client) -> int:
     spec_path = Path(args.spec)
     spec = pipeline.load_spec(spec_path)
     out_dir = Path(args.out) if args.out else spec_path.parent
-    result = pipeline.analyze_spec(client, spec, out_dir)
+    result = pipeline.analyze_spec(client, spec, out_dir, **_report_options(args))
     result["files"]["spec"] = str(spec_path)
     emit(result)
     return 0
@@ -145,8 +156,17 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--search-lang", default="en", help="language the topic is written in (default en)")
         p.add_argument("--out", help="output directory (default: output/<qid>-<label>/)")
 
+    def add_report_args(p: argparse.ArgumentParser) -> None:
+        p.add_argument("--report", action="store_true", help="also write a one-page PDF report (report.pdf)")
+        p.add_argument("--question", help="the user's question, shown as the report title")
+        p.add_argument("--note", help="note for 'What was measured', e.g. why this article is a proxy")
+        p.add_argument("--weights", type=parse_weights, default=ranking.parse_weights(None),
+                       help="ranking weights, e.g. momentum=0.5,size=0.3,confidence=0.2 "
+                            "(default momentum=0.4,size=0.4,confidence=0.2)")
+
     p = sub.add_parser("compare", help="Resolve a topic, fetch pageviews, analyze and chart (primary command)")
     add_query_args(p)
+    add_report_args(p)
     p.set_defaults(func=cmd_compare)
 
     p = sub.add_parser("resolve", help="Find the Wikidata item and article titles; write a query spec")
@@ -160,6 +180,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("analyze", help="Compute growth and normalized share for a query spec; draw the chart")
     p.add_argument("--spec", required=True, help="path to query.json written by resolve")
     p.add_argument("--out", help="output directory (default: the spec's directory)")
+    add_report_args(p)
     p.set_defaults(func=cmd_analyze)
 
     return parser

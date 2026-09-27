@@ -32,6 +32,39 @@ def assign_colors(order: list[str]) -> dict[str, str]:
     return {lang: SERIES_COLORS[i] for i, lang in enumerate(order[:MAX_SERIES])}
 
 
+def draw_panel(ax, months: list[str], series: dict[str, dict], key: str, langs: list[str],
+               colors: dict[str, str], spans: list[tuple[float, float]],
+               drop_zeros: bool = False) -> list[tuple[str, float]]:
+    """Draw one metric ("share" or "views") for each language; return (lang, last value) pairs."""
+    x = list(range(len(months)))
+    ax.set_facecolor(SURFACE)
+    ends = []
+    for lang in langs:
+        values = series[lang][key]
+        y = [values.get(m) for m in months]
+        y = [math.nan if v is None or (drop_zeros and v <= 0) else v for v in y]
+        ax.plot(x, y, color=colors[lang], linewidth=1.8, label=lang, solid_capstyle="round")
+        last = next((v for v in reversed(y) if not math.isnan(v)), None)
+        if last is not None:
+            ends.append((lang, last))
+    for left, right in spans:
+        ax.axvspan(left, right, color=COMPARED_FILL, zorder=0, linewidth=0)
+    # The two periods touch when 12 months are compared; mark where the recent one starts.
+    ax.axvline(spans[1][0], color=TEXT_SECONDARY, linewidth=0.8, linestyle=(0, (4, 3)), zorder=1)
+    ax.grid(axis="y", color=GRID, linewidth=0.6)
+    ax.tick_params(colors=TEXT_SECONDARY, labelsize=8)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color(GRID)
+    return ends
+
+
+def compared_spans(months: list[str], compared: tuple[list[str], list[str]]) -> list[tuple[float, float]]:
+    """x-ranges of the (year-earlier, recent) periods, for shading."""
+    return [(months.index(period[0]) - 0.5, months.index(period[-1]) + 0.5) for period in compared]
+
+
 def render(
     path: Path,
     title: str,
@@ -62,7 +95,7 @@ def render(
     if compared is None:
         half = len(months) // 2
         compared = (months[:half], months[half:])
-    spans = [(months.index(period[0]) - 0.5, months.index(period[-1]) + 0.5) for period in compared]
+    spans = compared_spans(months, compared)
 
     fig, (ax_share, ax_views) = plt.subplots(2, 1, figsize=(9, 6.4), sharex=True, facecolor=SURFACE)
     fig.suptitle(title, x=0.06, y=0.975, ha="left", fontsize=13, fontweight="bold", color=TEXT_PRIMARY)
@@ -71,28 +104,10 @@ def render(
     positive = [v for lang in langs for v in series[lang]["views"].values() if v > 0]
     log_scale = bool(positive) and max(positive) / min(positive) >= LOG_SCALE_RATIO
 
-    line_ends: dict = {ax_share: [], ax_views: []}
-    for ax, key in [(ax_share, "share"), (ax_views, "views")]:
-        ax.set_facecolor(SURFACE)
-        drop_zeros = key == "views" and log_scale
-        for lang in langs:
-            values = series[lang][key]
-            y = [values.get(m) for m in months]
-            y = [math.nan if v is None or (drop_zeros and v <= 0) else v for v in y]
-            ax.plot(x, y, color=colors[lang], linewidth=1.8, label=lang, solid_capstyle="round")
-            last = next((v for v in reversed(y) if not math.isnan(v)), None)
-            if last is not None:
-                line_ends[ax].append((lang, last))
-        for left, right in spans:
-            ax.axvspan(left, right, color=COMPARED_FILL, zorder=0, linewidth=0)
-        # The two periods touch when 12 months are compared; mark where the recent one starts.
-        ax.axvline(spans[1][0], color=TEXT_SECONDARY, linewidth=0.8, linestyle=(0, (4, 3)), zorder=1)
-        ax.grid(axis="y", color=GRID, linewidth=0.6)
-        ax.tick_params(colors=TEXT_SECONDARY, labelsize=8)
-        for side in ("top", "right"):
-            ax.spines[side].set_visible(False)
-        for side in ("left", "bottom"):
-            ax.spines[side].set_color(GRID)
+    line_ends = {
+        ax_share: draw_panel(ax_share, months, series, "share", langs, colors, spans),
+        ax_views: draw_panel(ax_views, months, series, "views", langs, colors, spans, drop_zeros=log_scale),
+    }
 
     ax_share.set_title("Share of all views in that Wikipedia (per million)", loc="left",
                        fontsize=10, color=TEXT_SECONDARY)
@@ -130,7 +145,7 @@ def render(
 
     if len(langs) <= MAX_DIRECT_LABELS:
         for ax, ends in line_ends.items():
-            _direct_labels(fig, ax, x[-1], ends)
+            direct_labels(fig, ax, x[-1], ends)
 
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=DPI, facecolor=SURFACE)
@@ -138,7 +153,7 @@ def render(
     return langs
 
 
-def _direct_labels(fig, ax, x_end: float, ends: list[tuple[str, float]]) -> None:
+def direct_labels(fig, ax, x_end: float, ends: list[tuple[str, float]]) -> None:
     """Label each line at its right end, nudging labels apart so they never overlap."""
     if not ends:  # e.g. an article with no views at all in the period
         return

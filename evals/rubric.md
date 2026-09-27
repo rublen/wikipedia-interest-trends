@@ -28,6 +28,9 @@ Score each item **pass**, **fail**, or **n/a** (the item doesn't apply to this r
 |---|---|---|
 | E1a | Example #1 (pl vs cs, intermittent fasting) | Polish is reported as a finding ("no Polish article, so interest can't be measured there"), not as an error and not left out |
 | E2a | Example #2 (astronomy, Ukrainian, "how far can it be trusted?") | The trust question is answered with the verdict, the confidence and its reasons |
+| E3a | Example #3 (learning English, 8 languages, report) | The answer and the report say the analyzed article is a **proxy** for "learning English" (and which one) |
+| E3b | Example #3 | A report was made (`--report`, `--question`) and `files.report` is given |
+| E3c | Example #3 | The `recommendation` lines are quoted (not rewritten into a go/no-go) and the weights used are stated |
 
 ## How runs are scored
 
