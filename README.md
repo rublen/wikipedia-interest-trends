@@ -148,7 +148,9 @@ checked outside the model that produced it:
   check, and edge cases for every code-written sentence.
 - **Calibration on real topics** before fixing thresholds; each wrong answer changed a rule.
 - **Cheap-model runs scored with a rubric**, a stopping criterion set before the last tuning
-  batch, and a holdout set whose expectations were committed before its runs.
+  batch, and a holdout set whose expectations were committed before its runs. Runs are
+  reproducible with `python3 evals/run_scenarios.py H1 H2 --runs 2` (scenarios in
+  `evals/scenarios.json`).
 - **A grounding checker** ([`evals/grounding.py`](evals/grounding.py)) that flags quotes and
   numbers not present in what the model received. It caught the fabricated quote and "14 of 12
   months"; on the holdout it had 2 false positives in 14 runs (decimal commas in Ukrainian) and,
@@ -167,7 +169,8 @@ setup.sh                 environment setup (uv, or pinned pip fallback)
 scripts/wit.py           command line
 scripts/wikitrends/      resolve, pageviews, analysis, trust checks, ranking, findings, chart, report
 tests/                   offline tests
-evals/                   rubric, run log, holdout, verification log, grounding checker, transcripts
+evals/                   scenarios and runner, rubric, run log, holdout, verification log,
+                         grounding checker, transcripts
 docs/ROADMAP.md          current state, limitations, next iterations, scaling, evaluation
 PLAN.md                  plan, iteration history and design findings
 ```

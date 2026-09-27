@@ -1,0 +1,13 @@
+{
+  "_comment": "Agent-run scenarios for evals/run_scenarios.py. 'turns' is a list of user messages sent in one conversation (the second and later ones with --continue). Expectations for the holdout are in holdout.md; scoring rules in rubric.md.",
+  "ex1": {"set": "examples", "turns": ["Compare the growth of interest in intermittent fasting in the Polish and Czech Wikipedia over the last two years."]},
+  "ex2": {"set": "examples", "turns": ["We're thinking about adding an astronomy course to our educational app. Is interest in this topic growing on Ukrainian Wikipedia, and how far can that growth be trusted?"]},
+  "ex3": {"set": "examples", "turns": ["We're building a language-learning app. Compare interest in learning English in our chosen language editions: Ukrainian, Polish, German, Spanish, Portuguese, Turkish, Japanese and Vietnamese. Prepare a short report: which audiences should we explore next, and why?"]},
+  "H1": {"set": "holdout", "turns": ["Is interest in chess growing on German Wikipedia?"]},
+  "H2": {"set": "holdout", "turns": ["We make nutrition content for Polish and Czech readers. Compare interest in apples in the Polish and Czech Wikipedia over the last two years."]},
+  "H3": {"set": "holdout", "turns": ["How has interest in Java changed on Polish Wikipedia?"]},
+  "H4": {"set": "holdout", "turns": ["Чи зростає інтерес до вивчення англійської мови в українській Вікіпедії? Ми думаємо про курс англійської для українців."]},
+  "H5": {"set": "holdout", "turns": ["Compare interest in pickleball in the Czech, Polish and German Wikipedia."]},
+  "H6": {"set": "holdout", "turns": ["Is interest in papal conclaves growing in the Polish and Italian Wikipedia?"]},
+  "H7": {"set": "holdout", "turns": ["Compare interest in yoga in the Ukrainian and Polish Wikipedia.", "Now add German, and weight audience size more than momentum."]}
+}

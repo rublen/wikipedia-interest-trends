@@ -71,8 +71,9 @@ for more than 8 languages (small multiples).
   only separate "fails here" from "one bad run" roughly.
 - **Human scoring:** a second scorer on a sample, measuring agreement with the current scores,
   since the rubric's judgment items (G5, G8, G10) are scored by the developing agent today.
-- **More automation:** the grounding check and the string-matching items are already
-  mechanical; add replayed tool outputs (fixtures) so agent runs don't depend on live data, and
-  run the suite on every change to `SKILL.md` or the output format.
+- **More automation:** running scenarios (`evals/run_scenarios.py`), the grounding check and
+  the string-matching items are already mechanical; add replayed tool outputs (fixtures) so agent
+  runs don't depend on live data, and run the suite on every change to `SKILL.md` or the output
+  format.
 - **More models:** Haiku as the baseline, a pinned free model with tool calling, and a stronger
   model as a ceiling, to separate skill problems from model problems.
