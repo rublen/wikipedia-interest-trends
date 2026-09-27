@@ -225,10 +225,13 @@ verdicts and confidence (G4 7/7, G6 7/7).
    adds context (the fallback discussed earlier).
 3. *Guard proxies in `resolve`.* **Done differently:** activity phrases ("learning X", "X courses")
    are never auto-picked. The Wikidata "instance of" version was rejected (see finding 6).
-4. *Automatic quote check in the evals.* A free model (Nemotron) put an invented sentence in
-   quotation marks and attributed it to the tool ("— recommendation"). A script can check that
-   every quoted string in an answer appears verbatim in the JSON the model received; this turns
-   part of G3 from reading into a mechanical check.
+4. *Automatic quote check in the evals.* **Built:** `evals/grounding.py` classes every quotation
+   as verbatim, edited or ungrounded and checks numbers and "N of M" phrases against what the
+   model received. On 10 scored transcripts it flags exactly the known fabrications (Nemotron's
+   invented, attributed quote and "14 of 12 months") and nothing in the 9 honest answers.
+5. *Grounding check inside the skill.* Run the same check on the agent's draft answer before it
+   is sent (e.g. `wit.py check-answer`), so an invented quote or number is caught at the source:
+   finding 6 ("guards belong in code") applied to the answer itself.
 
 ### 4. Follow-ups & efficiency
 - On-disk cache + reuse of the query spec, so "add Slovak" or "same for 5 years" are

@@ -47,3 +47,9 @@ The scorer is the developing agent (Claude) reading each transcript against this
 with every pass/fail backed by a quote; results are recorded in `cheap-model-runs.md`.
 Items that can be checked by string matching (G7 exact meaning, G9 scope, G11 chart path)
 are checked with `grep` rather than by eye.
+
+**Grounding check (part of G3):** `python evals/grounding.py <transcript.jsonl>` lists every
+quotation that is not in what the model received (*ungrounded*: a G3 fail), quotations that
+were trimmed but whose parts are all found (*edited*: often a G7 or E3c issue, not G3), and
+numbers or "N of M" phrases not in the input. It doesn't replace reading: paraphrases without
+quotation marks, correct numbers attached to wrong words, and G5/G8/G10 still need a reader.

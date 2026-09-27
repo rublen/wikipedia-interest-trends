@@ -630,6 +630,11 @@ without `--report` or `--note` (the prompt didn't ask for a report, so E3b is n/
 | E3c Recommendation quoted + weights | minor | **fail** | weights stated; recommendation partly quoted plus the invented quote above |
 | **All critical items passed** | | **no** | |
 
+Confirmed mechanically with `evals/grounding.py` (added afterwards): 1 ungrounded quote (the
+invented one) and 1 ungrounded number phrase ("14 of 12"); the Haiku and `openrouter/free`
+user runs and the 7 last-batch runs have none. The Haiku G3 failure ("largest audience (3rd
+overall)") is not caught: its numbers are right, the word "largest" is wrong.
+
 New failure type: **a fabricated quote in quotation marks, attributed to the tool output.** Quote
 marks alone don't prove a quote is real. This can be checked mechanically: every quoted string in
 an answer should appear verbatim in the JSON the model received (see roadmap: automatic quote check).
