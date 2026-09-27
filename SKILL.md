@@ -61,7 +61,7 @@ explore next", add:
 
 | status | What to do |
 |---|---|
-| `ok` | Check `topic.description` matches what the user means. If not, rerun with a `--qid` from `topic.resolution.candidates` or a more specific topic. Then answer (below). |
+| `ok` | Read `key_findings[0]` ("Analyzing: …"). If that is not what the user means (e.g. a radio programme or a book instead of the topic), don't answer: rerun with a `--qid` from `topic.resolution.candidates` or a better topic. Then answer (below). |
 | `ambiguous` | `resolution.reason` says why. If the user's context clearly points to one candidate in `resolution.candidates` (e.g. "chemistry app" → the element), say which one you chose and rerun with `--qid Q…`. Otherwise **stop**: list 2–3 candidates (label + description), ask which one, and end your reply. Do not run the analysis on a guess. |
 | `not_found` | Retry with the English name, a more common wording, or `--search-lang`. |
 | `error` | Report the message. Network errors: retry once. |
@@ -71,6 +71,12 @@ Per language, `languages.<code>.status`:
 report it, don't hide it); `unknown_language` = wrong language code.
 
 ## Writing the answer
+
+**Start from `key_findings`**: short sentences with every comparison across languages
+already worked out (which are growing, stable or declining; largest and smallest audience;
+steepest change; ranking; low-confidence results). Quote them as written. **Any statement
+comparing languages must come from `key_findings`**; never work out yourself which language
+is the largest, fastest, only one, or which group a language belongs to.
 
 Use only numbers from the JSON. The script already interprets them: **quote each
 language's `summary` and the top-level `comparison` verbatim**, word for word. Don't

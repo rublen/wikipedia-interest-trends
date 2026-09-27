@@ -427,3 +427,65 @@ stable or declining, which is smallest, which fell fastest, which is the "only" 
 states these, so the model computes them from eight per-language entries and gets them wrong.
 That is principle 2 ("never hand the model data it has to compare or rank") at the level of the
 whole answer.
+
+## 2026-09-27 — Final tuning batch: `key_findings`; example #3 ×5, #2 ×1, #1 ×1
+
+Change: `key_findings`, 5–7 short sentences with every cross-language claim precomputed (groups
+with explicit "none", largest/smallest audience, steepest change, ranking with weights,
+low-confidence languages, not-measurable languages), led by "Analyzing: <label> (<QID>),
+<description>" so a wrong topic shows in one line. `SKILL.md`: start from them; cross-language
+statements only from them; stop if "Analyzing" isn't what the user means. This was declared
+the last tuning batch in advance, whatever the result.
+
+Runs: `runs/2026-09-27-haiku-ex3-run15.md` … `-run19.md`, `runs/2026-09-27-haiku-ex2-run13.md`,
+`runs/2026-09-27-haiku-ex1-run8.md`. 4–5 turns, 19–30 s, $0.027–0.045. One tool error (r18:
+`bash setup.sh` inside a compound command needed approval; it recovered on the next call).
+
+| Item | Severity | #3 r15 | #3 r16 | #3 r17 | #3 r18 | #3 r19 | #2 r13 | #1 r8 | Count |
+|---|---|---|---|---|---|---|---|---|---|
+| G1 Uses the skill | critical | pass | pass | pass | pass | pass | pass | pass | 7/7 |
+| G2 Right topic | critical | pass | **fail** | pass | pass | pass | pass | pass | 6/7 |
+| G3 Numbers from the JSON | critical | pass | pass | **fail** | **fail** | pass | pass | pass | 5/7 |
+| G4 Units | critical | pass | pass | pass | pass | pass | pass | pass | 7/7 |
+| G5 Directions | critical | **fail** | pass | pass | pass | pass | pass | pass | 6/7 |
+| G6 Verdict and confidence | critical | pass | pass | pass | pass | pass | pass | pass | 7/7 |
+| G7 Confidence meaning quoted | minor | **fail** | **fail** | **fail** | **fail** | **fail** | pass | pass | 2/7 |
+| G8 No invented reasons | critical | **fail** | pass | **fail** | pass | pass | pass | **fail** | 4/7 |
+| G9 Scope quoted once | minor | **fail** | **fail** | **fail** | pass | **fail** | **fail** | pass | 2/7 |
+| G10 Next checks, not go/no-go | critical | pass | pass | pass | pass | **fail** | pass | n/a | 5/6 |
+| G11 Chart path | minor | pass | pass | **fail** | pass | pass | pass | **fail** | 5/7 |
+| E1a / E2a | critical | – | – | – | – | – | pass | pass | 2/2 |
+| E3a Proxy stated | critical | pass | **fail** | pass | pass | pass | – | – | 4/5 |
+| E3b Report made and given | critical | pass | pass | **fail** | pass | pass | – | – | 4/5 |
+| E3c Recommendation quoted + weights | minor | **fail** | **fail** | **fail** | pass | **fail** | – | – | 1/5 |
+| **All items passed** | | no | no | no | no | no | no | no | **0/7** |
+| **All critical items passed** | | no | no | no | no | no | yes | no | **1/7** |
+
+**Stopping criterion: not met** (#3 critical pass 0/5, same as the previous batch). Per the
+rule set before the batch, tuning stops here; the remaining failures are recorded as known
+limitations in `PLAN.md`.
+
+**`key_findings` were not used:** 0 of 7 answers quoted the groups sentence or the
+"Analyzing" line. Answers still made their own cross-language claims, and they were still the
+main critical errors: r17 "German and Vietnamese … the **only two** where interest didn't lose
+ground" (Turkish too); r15 lists Turkish among audiences that "all show **downward** momentum"
+and calls Vietnamese a "**growing** absolute interest base" (its views fell 23.1%); r18 swaps
+the numbers ("Polish and Ukrainian's declines, **14.6% and 10.4%** respectively"; it is the
+other way round).
+
+Evidence for the other failures:
+- **G2, E3a (r16):** searched "learning English" and analyzed the Voice of America programme
+  again, describing it correctly ("Voice of America's 'Learning English' (a simplified-English
+  program)") and still calling it a proxy. Second occurrence in 10 runs; making the entity
+  visible was not enough.
+- **G8:** r15 "75% of views in one period were bot traffic, which may **inflate** some months";
+  r17 "stable interest in a **growing market**"; #1 r8 "not just **seasonal** spikes".
+- **G10 (r19):** "Declining audiences (**avoid for now**)".
+- **G7, G9:** meaning and scope paraphrased in 5 of 7 answers; r18 gave German's *medium* level
+  the *high* meaning again ("German's stability is real (the data consistently shows this)").
+
+**Likely cause (hypothesis, untested because this was the last batch):** the agent-facing JSON
+for 8 languages is about 5,300 tokens, most of it per-language detail, and `SKILL.md` (1,095
+words) asks both to "start from `key_findings`" and to quote every language's `summary`. The
+model follows the more detailed per-language instruction and writes its own connecting
+sentences between the quotes.

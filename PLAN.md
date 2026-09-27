@@ -183,6 +183,34 @@ calibrating thresholds on a few topics.
 5. **Name the metric in every sentence.** "10 of 12 months were below" became "months with
    fewer views" (the count is on the share) in three runs, until the reason said "the share".
 
+**Outcome (2026-09-27): criterion not met; tuning stopped as planned.** Final batch (5× #3,
+#2 and #1 regressions, Claude Haiku 4.5): all critical items passed in 0 of 5 #3 runs and in
+1 of 2 regression runs. Code-computed facts held throughout: numbers, units, per-language
+verdicts and confidence (G4 7/7, G6 7/7).
+
+**Known limitations, with counts from the final batch (`evals/cheap-model-runs.md`):**
+- **Cross-language claims written by the model** are still wrong in multi-language answers
+  (G3 5/7, G5 6/7): "the only two stable", a stable language listed as declining, swapped
+  numbers. `key_findings` states these facts precomputed, but 0 of 7 answers quoted it.
+- **Wrong topic accepted** (G2): 2 of the last 10 #3 runs analyzed the Voice of America
+  "Learning English" programme instead of using a proxy, even with an "Analyzing: …" line.
+- **Own explanations** (G8 4/7 passed): bots "inflating" numbers, "growing market", "seasonal".
+- **Paraphrasing instead of quoting** (G7 2/7, G9 2/7, E3c 1/5): the meaning of the confidence
+  level, the scope sentence and the recommendation are often reworded.
+- Single-language answers (#1, #2) are mostly correct; errors concentrate in 8-language synthesis.
+
+**Untested hypotheses, for the roadmap:**
+1. *Too much output.* The agent-facing JSON for 8 languages is ~5,300 tokens and SKILL.md
+   1,095 words, with competing instructions ("start from key_findings" vs "quote each summary").
+   Try progressive disclosure: a compact default (topic, key findings, one line per language,
+   recommendation, scope, files) and `--details` for per-language depth.
+2. *A ready-to-quote answer.* If the compact output still leaves the model writing its own
+   cross-language sentences, the script writes the whole answer as Markdown and the model only
+   adds context (the fallback discussed earlier).
+3. *Guard proxies in `resolve`.* When the chosen item is a work, programme or organisation
+   (Wikidata "instance of"), return `ambiguous` with the concept candidates instead of
+   auto-picking, since describing the wrong entity didn't stop the model from using it.
+
 ### 4. Follow-ups & efficiency
 - On-disk cache + reuse of the query spec, so "add Slovak" or "same for 5 years" are
   cheap.

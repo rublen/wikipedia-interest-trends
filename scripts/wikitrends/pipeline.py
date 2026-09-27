@@ -9,7 +9,7 @@ import re
 from datetime import date
 from pathlib import Path
 
-from wikitrends import analyze, chart, ranking, report, trust
+from wikitrends import analyze, chart, findings, ranking, report, trust
 from wikitrends.api import Client
 from wikitrends.config import OUTPUT_DIR
 from wikitrends.months import FIRST_AVAILABLE, add_months, last_complete_month, month_range
@@ -153,6 +153,7 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path, weights: dict[str, f
         "status": "ok",
         "topic": {"query": spec["query"], "qid": spec["qid"], "label": spec["label"],
                   "description": spec["description"], "note": note},
+        "key_findings": [],
         "period": {"comparison": f"last {window} complete month{'s' if window > 1 else ''} vs the "
                                  "same months a year earlier",
                    "recent": f"{recent[0]}..{recent[-1]}", "previous": f"{previous[0]}..{previous[-1]}",
@@ -189,6 +190,7 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path, weights: dict[str, f
         result["period"]["notes"].append("no chart: none of the languages has an article to plot")
 
     result["recommendation"] = ranking.recommendation(result["ranking"])
+    result["key_findings"] = findings.key_findings(result["topic"], languages, result["ranking"], note)
     if make_report:
         report_path = out_dir / "report.pdf"
         fits = report.render(report_path, result, months, plotted, (previous, recent), spec["langs"],
