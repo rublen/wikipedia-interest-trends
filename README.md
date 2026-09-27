@@ -7,6 +7,7 @@ the data, compares, checks how far each result can be trusted, and writes the se
 quotes, plus a chart and a one-page PDF report.
 
 The repository root is the skill directory; the agent's entry point is [`SKILL.md`](SKILL.md).
+How to develop it further: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 > Pageviews measure reader interest on Wikipedia, not willingness to pay or market size:
 > use this to choose what to validate next, not to decide on its own.
@@ -167,7 +168,8 @@ scripts/wit.py           command line
 scripts/wikitrends/      resolve, pageviews, analysis, trust checks, ranking, findings, chart, report
 tests/                   offline tests
 evals/                   rubric, run log, holdout, verification log, grounding checker, transcripts
-PLAN.md                  plan, iteration history, findings and roadmap
+docs/ROADMAP.md          current state, limitations, next iterations, scaling, evaluation
+PLAN.md                  plan, iteration history and design findings
 ```
 
 ## Development
