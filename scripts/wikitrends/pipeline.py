@@ -118,8 +118,17 @@ def reproduce_command(spec: dict, weights: dict[str, float]) -> str:
     return cmd + " --report"
 
 
+# More measurable languages than this: stdout gets the compact form (see `compact`).
+COMPACT_ABOVE = 2
+
+
 def analyze_spec(client: Client, spec: dict, out_dir: Path, weights: dict[str, float] | None = None,
-                 make_report: bool = False, question: str | None = None, note: str | None = None) -> dict:
+                 make_report: bool = False, question: str | None = None, note: str | None = None,
+                 details: bool = False) -> dict:
+    """Returns the agent-facing result: compact for many languages unless `details`.
+
+    result.json always gets the full agent-facing version.
+    """
     months = month_range(spec["start"], spec["end"])
     window = spec["window"]
     previous, recent = trust.windows(months, window)
@@ -206,9 +215,49 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path, weights: dict[str, f
     result["files"]["data"] = str(csv_path)
     result_path = out_dir / "result.json"
     result["files"]["result"] = str(result_path)
-    result = model_facing(result)
-    write_json(result_path, result)
-    return result
+    full = model_facing(result)
+    write_json(result_path, full)
+    measurable = sum(1 for r in result["languages"].values() if r.get("share_growth_pct") is not None)
+    return full if details or measurable <= COMPACT_ABOVE else compact(result, full)
+
+
+def _line(r: dict) -> str:
+    """One code-written line per language for the compact output."""
+    trend = r["trend"]
+    verdict = trend["verdict"].replace("_", " ")
+    text = (f"{verdict} with {trend['confidence']} confidence ({trust.MEANINGS[trend['confidence']]}): "
+            f"share {analyze.share_change_text(r['share_growth_pct'], trend)}; "
+            f"{r['avg_monthly_views_recent']:,} views/month")
+    if trend["confidence"] != "high" and trend["reasons"]:
+        text += f"; main reason: {trend['reasons'][0]}"
+    return text + "."
+
+
+def compact(result: dict, full: dict) -> dict:
+    """Agent-facing result for many languages: findings, comparison and one line per language.
+
+    Full per-language summaries made the answer long, and agents then paraphrased and wrote
+    their own cross-language claims instead of quoting `key_findings`; leaving them out of the
+    default output removes that competing text.
+    """
+    out = {k: v for k, v in full.items() if k not in ("languages", "ranking", "ranking_by_share_growth")}
+    out["languages"] = {}
+    for lang, r in result["languages"].items():
+        if r.get("status") == "ok" and r.get("share_growth_pct") is not None:
+            out["languages"][lang] = {"status": "ok", "title": r["title"], "line": _line(r)}
+        else:
+            out["languages"][lang] = full["languages"][lang]
+    out["ranking"] = {
+        "weights": full["ranking"]["weights"],
+        "languages": [{k: row[k] for k in ("lang", "rank", "score")} for row in full["ranking"]["languages"]],
+        "not_ranked": full["ranking"]["not_ranked"],
+    }
+    out["details"] = ("Compact output for many languages. Per-language summaries and all reasons: "
+                      "files.result, the PDF report, or rerun with --details.")
+    # Keep the reading order: findings and comparison before the per-language lines.
+    order = ["status", "topic", "key_findings", "period", "comparison", "languages", "recommendation",
+             "ranking", "scope", "files", "limitations", "details"]
+    return {k: out[k] for k in order if k in out}
 
 
 def model_facing(result: dict) -> dict:

@@ -67,7 +67,8 @@ def parse_weights(value: str) -> dict[str, float]:
 
 
 def _report_options(args: argparse.Namespace) -> dict:
-    return {"weights": args.weights, "make_report": args.report, "question": args.question, "note": args.note}
+    return {"weights": args.weights, "make_report": args.report, "question": args.question, "note": args.note,
+            "details": args.details}
 
 
 def _resolve_and_spec(args: argparse.Namespace, client: Client) -> tuple[dict, dict | None]:
@@ -160,6 +161,8 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--report", action="store_true", help="also write a one-page PDF report (report.pdf)")
         p.add_argument("--question", help="the user's question, shown as the report title")
         p.add_argument("--note", help="note for 'What was measured', e.g. why this article is a proxy")
+        p.add_argument("--details", action="store_true",
+                       help="full per-language summaries and reasons even for many languages")
         p.add_argument("--weights", type=parse_weights, default=ranking.parse_weights(None),
                        help="ranking weights, e.g. momentum=0.5,size=0.3,confidence=0.2 "
                             "(default momentum=0.4,size=0.4,confidence=0.2)")

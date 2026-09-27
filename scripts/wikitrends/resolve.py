@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from wikitrends.api import Client
 
 WIKIDATA_API = "https://www.wikidata.org/w/api.php"
@@ -13,6 +15,26 @@ SEARCH_LIMIT = 7
 DESCRIPTION_CHARS = 90
 # Auto-pick only if the top search hit is also the most-linked item and clearly dominant.
 DOMINANCE_RATIO = 2.0
+
+
+# Queries that describe an activity around a topic, not the topic itself. Wikipedia has
+# articles on concepts ("English language"); an activity phrase can match a niche item exactly
+# (e.g. "learning English" -> a Voice of America programme) and agents used it even after
+# describing it correctly, so this check is in code.
+_INTENT = re.compile(
+    # Conservative: "X learning" (machine learning), "teaching X" (TEFL) and "study X" name real
+    # concepts, so they are not matched. A false match only costs one extra step (see reason).
+    r"^(?:learning|learn|studying|how to learn|courses? (?:in|on|of)|lessons? (?:in|on))\s+(.+)$"
+    r"|^(.+?)\s+(?:courses?|classes|lessons|tutorials?|for beginners)$",
+    re.IGNORECASE)
+
+
+def intent_core(topic: str) -> str | None:
+    """'learning English' -> 'English'; None if the query doesn't look like an activity phrase."""
+    match = _INTENT.match(topic.strip())
+    if not match:
+        return None
+    return (match.group(1) or match.group(2)).strip()
 
 
 def site_for_lang(lang: str) -> str:
@@ -135,6 +157,14 @@ def resolve(
             })
 
     decision, reason, best, runner_up, ratio = _decide(candidates)
+    core = intent_core(topic or "")
+    if core:
+        decision = "ambiguous"
+        reason = (f"'{topic}' describes an activity, not a topic; Wikipedia articles are about concepts, "
+                  f"and the closest match may be something else (search result #1: {candidates[0]['label']}, "
+                  f"{candidates[0]['description'] or 'no description'}). If '{topic}' itself is the topic, "
+                  f"pick it from the candidates with --qid; otherwise search for the concept instead, "
+                  f"e.g. \"{core}\", and say in the answer that it is a proxy")
     resolution = {
         "method": "search",
         "decision": decision,

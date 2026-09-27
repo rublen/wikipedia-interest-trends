@@ -61,59 +61,42 @@ explore next", add:
 
 | status | What to do |
 |---|---|
-| `ok` | Read `key_findings[0]` ("Analyzing: …"). If that is not what the user means (e.g. a radio programme or a book instead of the topic), don't answer: rerun with a `--qid` from `topic.resolution.candidates` or a better topic. Then answer (below). |
-| `ambiguous` | `resolution.reason` says why. If the user's context clearly points to one candidate in `resolution.candidates` (e.g. "chemistry app" → the element), say which one you chose and rerun with `--qid Q…`. Otherwise **stop**: list 2–3 candidates (label + description), ask which one, and end your reply. Do not run the analysis on a guess. |
-| `not_found` | Retry with the English name, a more common wording, or `--search-lang`. |
+| `ok` | Read `key_findings[0]` ("Analyzing: …"). If that is not what the user means, rerun **once** with a fitting `--qid` from `topic.resolution.candidates`. If none fits, stop and ask the user, as for `ambiguous`. Otherwise answer (below). |
+| `ambiguous` | `resolution.reason` says why and what to do. If the user's context clearly points to one candidate in `resolution.candidates` (e.g. "chemistry app" → the element), or the reason suggests a concept to search, say which you chose and rerun **once**. Otherwise **stop**: list 2–3 candidates (label + description), ask which one, and end your reply. Never run the analysis on a guess. |
+| `not_found` | At most **2 retries**: first the English name, then a different wording (or `--search-lang`). Still not found: tell the user and ask for another term. |
 | `error` | Report the message. Network errors: retry once. |
 
-Per language, `languages.<code>.status`:
-`ok` = analyzed; `no_article` = that Wikipedia has no article on the topic (a finding:
-report it, don't hide it); `unknown_language` = wrong language code.
+Per language, `languages.<code>.status`: `ok` = analyzed; `no_article` = that Wikipedia has
+no article on the topic (a finding: report it, don't hide it); `unknown_language` = wrong code.
 
 ## Writing the answer
 
-**Start from `key_findings`**: short sentences with every comparison across languages
-already worked out (which are growing, stable or declining; largest and smallest audience;
-steepest change; ranking; low-confidence results). Quote them as written. **Any statement
-comparing languages must come from `key_findings`**; never work out yourself which language
-is the largest, fastest, only one, or which group a language belongs to.
+The script has already done every calculation and comparison. Your job is to put its
+sentences in order and quote them. **Never compare languages yourself** (which is largest,
+fastest, the only one, which group a language belongs to): every such statement must be a
+quote from `key_findings` or `comparison`. Never state a number that isn't in the output.
 
-Use only numbers from the JSON. The script already interprets them: **quote each
-language's `summary` and the top-level `comparison` verbatim**, word for word. Don't
-paraphrase them or add your own explanation of why numbers differ (no "despite",
-"because", "reflects"). Changes are given in words (`share_change`, `views_change`,
-`project_change`); a "no clear change" has no direction on purpose, so never call it
-growth or decline. Structure:
+In this order:
 
-1. **What was measured**: the Wikidata item (label, description), `topic.note` if present
-   (e.g. that the article is a proxy), the article title per language, and
-   `period.comparison` with the `period.recent` and `period.previous` months.
-2. **Results per language**, in `ranking.languages` order: the language's
-   `summary` (verbatim; it ends with the verdict, the confidence and its reasons), plus
-   `avg_monthly_views_recent` for scale. Change in share is the main comparison (it
-   removes differences in each Wikipedia's size and overall traffic). With 2+ languages,
-   add the `comparison` sentence.
-3. **Notes**: every item in `languages.<code>.notes` and `period.notes`, and any
-   `no_article` languages.
-4. **Trust**: the `summary` already states the verdict, the confidence and what that
-   confidence level means; quote it and don't describe the level in your own words.
-   If the user asks how far to trust a result, list that language's `trend.reasons`
-   (verbatim). Seasonality is already handled (same months a year earlier); don't cite
-   it as a weakness.
+1. **What was measured**: quote `key_findings[0]` ("Analyzing: …", including the proxy
+   note if there is one) and `period.comparison` with the `period.recent` and
+   `period.previous` months.
+2. **Key findings**: quote the rest of `key_findings`, verbatim, always.
+3. **Comparison** (2+ languages): quote `comparison`.
+4. **Per language**: quote each language's `line` (many languages) or `summary` (one or two
+   languages). They already contain the verdict, the confidence and what that confidence
+   means; don't describe the level in your own words. For all reasons behind one result,
+   quote its `trend.reasons` (in `files.result` or with `--details` for many languages).
 5. **Which to explore next** (when asked): quote the `recommendation` lines verbatim,
-   including the "Ranking weights" line. To explain **why** a language ranks where it
-   does, quote its `ranking.languages[].why`; it names the momentum, size and confidence
-   behind the score. Don't add business reasons of your own (market size, investment,
-   "safer bet", underserved demand, competition): the data doesn't show them.
-6. **Scope**: quote the top-level `scope` sentence once, verbatim. Add other
-   `limitations` only if they matter for this question.
-7. **Files**: always give the path in `files.chart`, and `files.report` if one was made;
-   the data is in `files.data` (CSV).
+   including the "Ranking weights" line. Don't add business reasons of your own (market,
+   investment, "safer bet", demand, competition, saturation): the data doesn't show them.
+   Recommendations are about **what to check next**, never a go/no-go on the product.
+6. **Scope**: quote the `scope` sentence once, verbatim.
+7. **Files**: give `files.chart`, and `files.report` if a report was made.
 
-Keep it short. Never state a higher confidence than `trend.confidence`, and don't call a
-`no_clear_change` result growth or decline. Recommendations are about **what to check
-next** (e.g. "validate demand in pl before uk"), never a go/no-go on the product: reader
-interest alone can't decide that.
+Changes are in words; a "no clear change" has no direction on purpose, so never call it
+growth or decline. Seasonality is already handled (same months a year earlier); don't cite
+it as a weakness. Detected bots are already excluded from the numbers.
 
 ## Follow-up questions
 

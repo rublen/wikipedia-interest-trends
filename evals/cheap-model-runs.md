@@ -489,3 +489,62 @@ for 8 languages is about 5,300 tokens, most of it per-language detail, and `SKIL
 words) asks both to "start from `key_findings`" and to quote every language's `summary`. The
 model follows the more detailed per-language instruction and writes its own connecting
 sentences between the quotes.
+
+## 2026-09-27 — Last batch: compact output + activity-phrase guard; example #3 ×5, #2 ×1, #1 ×1
+
+Changes (fixing a known contradiction, not tuning): for more than 2 measurable languages the
+default output has `key_findings`, `comparison`, one code-written `line` per language and the
+recommendation, without per-language summaries (~1,800 tokens instead of ~5,300; full detail in
+`files.result` or with `--details`); `resolve` never auto-picks an activity phrase ("learning X",
+"X courses"); SKILL.md answer section rewritten as one ordered list without competing
+instructions, with bounded retries (960 words, was 1,095).
+
+Runs: `runs/2026-09-27-haiku-ex3-run20.md` … `-run24.md`, `runs/2026-09-27-haiku-ex2-run14.md`,
+`runs/2026-09-27-haiku-ex1-run9.md`. 4–5 turns, 22–29 s, $0.025–0.032, no tool errors. All
+five #3 runs searched "English language" directly.
+
+| Item | Severity | #3 r20 | #3 r21 | #3 r22 | #3 r23 | #3 r24 | #2 r14 | #1 r9 | Count | Previous |
+|---|---|---|---|---|---|---|---|---|---|---|
+| G1 Uses the skill | critical | pass | pass | pass | pass | pass | pass | pass | 7/7 | 7/7 |
+| G2 Right topic | critical | pass | pass | pass | pass | pass | pass | pass | 7/7 | 6/7 |
+| G3 Numbers from the JSON | critical | pass | pass | pass | pass | pass | pass | pass | 7/7 | 5/7 |
+| G4 Units | critical | pass | pass | pass | pass | pass | pass | pass | 7/7 | 7/7 |
+| G5 Directions | critical | pass | pass | pass | pass | pass | pass | pass | 7/7 | 6/7 |
+| G6 Verdict and confidence | critical | pass | **fail** | pass | pass | pass | pass | pass | 6/7 | 7/7 |
+| G7 Confidence meaning quoted | minor | **fail** | **fail** | **fail** | **fail** | **fail** | pass | **fail** | 1/7 | 2/7 |
+| G8 No invented reasons | critical | **fail** | **fail** | **fail** | pass | pass | pass | **fail** | 3/7 | 4/7 |
+| G9 Scope quoted once | minor | pass | pass | pass | pass | pass | pass | pass | 7/7 | 2/7 |
+| G10 Next checks, not go/no-go | critical | pass | pass | pass | pass | pass | pass | n/a | 6/6 | 5/6 |
+| G11 Chart path | minor | pass | pass | pass | pass | pass | **fail** | pass | 6/7 | 5/7 |
+| E1a / E2a | critical | – | – | – | – | – | pass | pass | 2/2 | 2/2 |
+| E3a Proxy stated | critical | pass | pass | pass | pass | pass | – | – | 5/5 | 4/5 |
+| E3b Report made and given | critical | pass | pass | pass | pass | pass | – | – | 5/5 | 4/5 |
+| E3c Recommendation quoted + weights | minor | **fail** | pass | pass | pass | **fail** | – | – | 3/5 | 1/5 |
+| **All items passed** | | no | no | no | no | no | no | no | **0/7** | 0/7 |
+| **All critical items passed** | | no | no | no | **yes** | **yes** | **yes** | no | **3/7** | 1/7 |
+
+Failures by severity: critical 5 (previous 10), minor 9 (previous 16).
+**Stopping criterion: not met** (#3 critical pass 2/5, target ≥ 4/5). As agreed, this was the
+last batch.
+
+What changed:
+- **`key_findings` are now quoted:** the groups sentence and "Largest audience" in 5/5 #3
+  answers (0/7 before). Wrong cross-language claims dropped to one answer (r21, "lowest
+  confidence", scored under G6); G3 and G5 were 7/7 (before, these were the main critical errors).
+- **Scope quoted 7/7** (2/7 before); no wrong topic; every #3 run went straight to "English language".
+
+Remaining failures:
+- **G8 (4 of 7), all in the model's own "why" paragraphs after the quotes:** r20 "may need
+  **product differentiation to retain users**"; r21 "a **safe bet**", "**hidden opportunity**",
+  "**early-adopter demand**", "a **saturated** or shifting market"; r22 "no deterioration suggests
+  **sustained demand**"; #1 r9 rewrote the confidence reason as "weakened by … **month-to-month
+  variation**" (the noise check supported the verdict; it wasn't a weakness).
+- **G6 (r21):** "Ukrainian and Portuguese show the steepest declines and **lowest confidence**";
+  Ukrainian is high confidence.
+- **G7 (6 of 7):** the per-language `line` was quoted without its bracketed confidence meaning.
+- **G11 (#2 r14), E3c (r20, r24):** chart path missing; recommendation shortened or weights left out.
+
+Reading: moving the comparisons into code and removing the competing text fixed the
+cross-language errors. What remains is the model's own interpretation when the user asks
+"why" — the one part of the answer the script doesn't write. That is what a ready-to-quote
+answer (roadmap) would address.

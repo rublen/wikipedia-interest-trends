@@ -182,8 +182,26 @@ calibrating thresholds on a few topics.
    signal" and "real enough to act on" until the script wrote the meaning next to the level.
 5. **Name the metric in every sentence.** "10 of 12 months were below" became "months with
    fewer views" (the count is on the share) in three runs, until the reason said "the share".
+6. **Model-side checks fail even when the model sees the problem; guards belong in code.**
+   Twice the model described the matched item correctly ("Voice of America's 'Learning English'
+   (a simplified-English program)") and analyzed it anyway, although SKILL.md named this case
+   and the output said "Analyzing: …". The guard is now in `resolve`: activity phrases
+   ("learning X", "X courses") are never auto-picked. A guard on Wikidata's "instance of" was
+   considered and rejected: the VOA item is an instance of *controlled language*, not a
+   programme, while ChatGPT (*website*) and Python (*software*) would have been blocked.
+7. **Remove competing text rather than ranking instructions.** With both "start from
+   key_findings" and "quote every summary" in SKILL.md, the model followed the detailed
+   per-language instruction: key findings were quoted in 0 of 7 answers. With a compact default
+   output (findings, comparison, one line per language; ~1,800 tokens instead of ~5,300) they
+   were quoted in 5 of 5, and answers with a wrong cross-language claim dropped from 3 of 7 to 1 of 7.
 
-**Outcome (2026-09-27): criterion not met; tuning stopped as planned.** Final batch (5× #3,
+**Final outcome (2026-09-27, last batch after fixing the output contradiction):** all critical
+items passed in 2 of 5 #3 runs (target 4 of 5) and 1 of 2 regression runs; critical failures
+fell from 10 to 5 per batch. Remaining: the model's own "why" interpretations (G8, 4 of 7
+answers: "safe bet", "sustained demand", "product differentiation"). Next step on the roadmap:
+a ready-to-quote answer, so the "why" is written by code too.
+
+**Earlier outcome (2026-09-27): criterion not met; tuning stopped as planned.** Final batch (5× #3,
 #2 and #1 regressions, Claude Haiku 4.5): all critical items passed in 0 of 5 #3 runs and in
 1 of 2 regression runs. Code-computed facts held throughout: numbers, units, per-language
 verdicts and confidence (G4 7/7, G6 7/7).

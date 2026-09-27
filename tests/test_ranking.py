@@ -1,3 +1,4 @@
+import json
 import re
 from datetime import date
 
@@ -134,3 +135,25 @@ def test_model_facing_result_has_no_signed_numbers(tmp_path):
     assert result["topic"]["note"] == "Proxy: X"
     # Human-facing CSV keeps the raw numbers.
     assert (tmp_path / "monthly.csv").read_text().startswith("month,lang,article_views")
+
+
+def test_many_languages_get_compact_output_unless_details(tmp_path):
+    client = _client(LANGS[:4])
+    resolved = resolve(client, LANGS[:4], topic="english")
+    spec = pipeline.build_spec(client, resolved, "english", LANGS[:4], 24, date(2026, 9, 25))
+    out = pipeline.analyze_spec(client, spec, tmp_path)
+    assert set(out["languages"]["uk"]) == {"status", "title", "line"}
+    assert "summary" not in json.dumps(out) and out["details"].startswith("Compact output")
+    assert list(out)[:5] == ["status", "topic", "key_findings", "period", "comparison"]
+    # result.json keeps the full agent-facing detail; --details prints it.
+    assert "summary" in json.loads((tmp_path / "result.json").read_text())["languages"]["uk"]
+    full = pipeline.analyze_spec(client, spec, tmp_path, details=True)
+    assert "summary" in full["languages"]["uk"]
+
+
+def test_two_languages_keep_full_output(tmp_path):
+    client = _client(LANGS[:2])
+    resolved = resolve(client, LANGS[:2], topic="english")
+    spec = pipeline.build_spec(client, resolved, "english", LANGS[:2], 24, date(2026, 9, 25))
+    out = pipeline.analyze_spec(client, spec, tmp_path)
+    assert "summary" in out["languages"]["uk"] and "details" not in out

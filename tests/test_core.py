@@ -150,6 +150,28 @@ def test_sister_projects_are_not_counted_as_wikipedias():
     assert resolve(client, ["uk"], qid="Q9")["item"]["wikipedias"] == 1
 
 
+@pytest.mark.parametrize("query, core", [
+    ("learning English", "English"), ("Learn Spanish", "Spanish"), ("studying astronomy", "astronomy"),
+    ("astronomy courses", "astronomy"), ("guitar lessons", "guitar"), ("Python for beginners", "Python"),
+    ("English language", None), ("machine learning", None), ("deep learning", None),
+    ("teaching English as a foreign language", None), ("intermittent fasting", None),
+])
+def test_intent_core(query, core):
+    from wikitrends.resolve import intent_core
+    assert intent_core(query) == core
+
+
+def test_activity_query_is_never_auto_picked():
+    hits = [{"id": "Q2731224", "label": "Learning English", "description": "simplified English in VOA"}]
+    client = FakeClient(search={"learning English": hits},
+                        entities={"Q2731224": entity("Learning English", "simplified English in VOA", many_sites(18))})
+    r = resolve(client, ["uk"], topic="learning English")
+    assert r["status"] == "ambiguous"
+    assert 'otherwise search for the concept instead, e.g. "English"' in r["resolution"]["reason"]
+    # An explicit --qid is the user's choice and is not second-guessed.
+    assert resolve(client, ["uk"], qid="Q2731224")["status"] == "resolved"
+
+
 def test_resolve_by_qid_and_not_found():
     client = FakeClient(entities={"Q9": entity("X", "x", {"ukwiki": "Ікс"})})
     assert resolve(client, ["uk"], qid="Q9")["titles"] == {"uk": "Ікс"}
