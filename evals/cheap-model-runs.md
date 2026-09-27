@@ -7,7 +7,7 @@ Local paths in the transcripts are replaced by placeholders (`transcript.py`): `
 the installed skill (in these runs a link to this repository), `<SANDBOX>` the empty working
 folder the agent ran in, `<repo>` this repository, `~` the home directory.
 
-Runs are produced with `python3 evals/run_scenarios.py <scenario ids> --runs N` (scenarios in
+Runs are produced with `uv run --locked python evals/run_scenarios.py <scenario ids> --runs N` (scenarios in
 `scenarios.json`); the runs below were made with the same commands typed by hand before the script
 existed.
 

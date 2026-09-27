@@ -149,8 +149,8 @@ checked outside the model that produced it:
 - **Calibration on real topics** before fixing thresholds; each wrong answer changed a rule.
 - **Cheap-model runs scored with a rubric**, a stopping criterion set before the last tuning
   batch, and a holdout set whose expectations were committed before its runs. Runs are
-  reproducible with `python3 evals/run_scenarios.py H1 H2 --runs 2` (scenarios in
-  `evals/scenarios.json`).
+  reproducible with `uv run --locked python evals/run_scenarios.py H1 H2 --runs 2` (scenarios in
+  `evals/scenarios.json`). This needs the Claude Code CLI (`claude`); the skill itself doesn't.
 - **A grounding checker** ([`evals/grounding.py`](evals/grounding.py)) that flags quotes and
   numbers not present in what the model received. It caught the fabricated quote and "14 of 12
   months"; on the holdout it had 2 false positives in 14 runs (decimal commas in Ukrainian) and,

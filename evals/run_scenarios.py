@@ -13,12 +13,13 @@ prints turns, cost, tool errors and the grounding check. Scoring against rubric.
 reading the transcripts; this script only produces them.
 
 Examples:
-    python3 evals/run_scenarios.py --list
-    python3 evals/run_scenarios.py H1 H3 --runs 2
-    python3 evals/run_scenarios.py --set holdout --runs 2 --prefix holdout-v2
-    python3 evals/run_scenarios.py ex3 --dry-run
+    uv run --locked python evals/run_scenarios.py --list
+    uv run --locked python evals/run_scenarios.py H1 H3 --runs 2
+    uv run --locked python evals/run_scenarios.py --set holdout --runs 2 --prefix holdout-v2
+    uv run --locked python evals/run_scenarios.py ex3 --dry-run
 
-Costs money on paid models (a Haiku run is about $0.02-0.06). For OpenRouter, set
+Needs the Claude Code CLI (`claude`) on PATH; the scripts in evals/ use only the Python
+standard library. Costs money on paid models (a Haiku run is about $0.02-0.06). For OpenRouter, set
 ANTHROPIC_BASE_URL / ANTHROPIC_AUTH_TOKEN in the environment and pass `--model <openrouter id>`.
 """
 
@@ -138,7 +139,7 @@ def run(args: argparse.Namespace) -> int:
             cost = f"${s['cost']:.4f}" if s["cost"] is not None else "–"
             print(f"{name:<42} {s['turns'] or '–':>5} {cost:>8} {s['tool_errors']:>11} {s['ungrounded']:>10}")
         print("\nNext: score each transcript against evals/rubric.md "
-              "(details of ungrounded items: python3 evals/grounding.py <run>.jsonl).")
+              "(details of ungrounded items: uv run --locked python evals/grounding.py <run>.jsonl).")
     return 0
 
 

@@ -4,7 +4,7 @@
 Keeps the prompt, tool calls, shortened tool results and the model's text. Drops session
 metadata (connected accounts, session ids, tool lists) and images.
 
-Usage: python evals/transcript.py runs/<run>.jsonl > runs/<run>.md
+Usage: uv run --locked python evals/transcript.py runs/<run>.jsonl > runs/<run>.md
 """
 
 from __future__ import annotations

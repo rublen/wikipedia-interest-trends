@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Grounding check for agent answers: are quotes and numbers traceable to what the model received?
 
-Usage: python evals/grounding.py <transcript.jsonl> [...]
+Usage: uv run --locked python evals/grounding.py <transcript.jsonl> [...]
 (`claude -p --output-format stream-json` logs and Claude Code session logs both work.)
 
 What it checks, against everything the model received (tool results, the skill text, the
