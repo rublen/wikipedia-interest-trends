@@ -84,17 +84,29 @@ def test_summary_explains_raw_vs_share_disagreement():
     assert "can't be computed" in analyze.summarize("de", _numbers(None, 1.0, None, before=0, after=5))
 
 
-def test_summary_follows_a_no_clear_change_verdict():
-    text = analyze.summarize("pl", _numbers(-16.1, -8.8, -8.0), verdict="no_clear_change")
-    assert "share of all views fell 8.0%, which is not a clear change in either direction." in text
-    assert "lost ground" not in text
+def test_summary_gives_no_direction_for_no_clear_change():
+    trend = {"verdict": "no_clear_change", "checks": {"noise_pct": 19.0}}
+    text = analyze.summarize("pl", _numbers(-16.1, -8.8, -8.0), trend)
+    assert ("share of all views moved 8.0%, within the ±19% normal fluctuation: "
+            "no clear change in either direction.") in text
+    assert "lost ground" not in text and "share of all views fell" not in text
+    beyond_noise = analyze.summarize("pl", _numbers(-16.1, -8.8, -8.0),
+                                     {"verdict": "no_clear_change", "checks": {"noise_pct": 3.0}})
+    assert "moved 8.0%, below the 10% needed to count as a real change" in beyond_noise
 
 
-def test_comparison_ranks_in_words():
-    languages = {"uk": {"share_growth_pct": -37.5}, "pl": {"share_growth_pct": -20.7}, "de": {"status": "no_article"}}
-    assert analyze.comparison(languages) == ("Ranked by change in share of attention, best first: "
-                                             "pl (share fell 20.7%), uk (share fell 37.5%).")
-    assert analyze.comparison({"pl": {"share_growth_pct": 1.0}}) is None
+def test_comparison_orders_in_words_without_noise_directions():
+    def lang(pct, verdict, confidence="high"):
+        return {"share_growth_pct": pct, "trend": {"verdict": verdict, "confidence": confidence,
+                                                   "checks": {"noise_pct": 7.0}}}
+    languages = {"uk": lang(-37.5, "declining"), "vi": lang(1.6, "no_clear_change"),
+                 "pl": lang(-20.7, "declining", "medium"), "de": {"status": "no_article"}}
+    assert analyze.comparison(languages) == (
+        "By change in share of attention, strongest first: "
+        "vi (share moved 1.6%, within the ±7% normal fluctuation, no clear change with high confidence); "
+        "pl (share fell 20.7%, declining with medium confidence); "
+        "uk (share fell 37.5%, declining with high confidence).")
+    assert analyze.comparison({"pl": lang(1.0, "no_clear_change")}) is None
 
 
 # --- resolve ----------------------------------------------------------------
@@ -174,7 +186,7 @@ def test_compare_pipeline_end_to_end(tmp_path):
     result = pipeline.analyze_spec(client, spec, tmp_path)
     assert result["languages"]["pl"]["status"] == "no_article"
     cs = result["languages"]["cs"]
-    assert cs["status"] == "ok" and cs["views_growth_pct"] == -50.0 and cs["share_growth_pct"] == -50.0
+    assert cs["status"] == "ok" and cs["views_change"] == "fell 50.0%" and cs["share_change"] == "fell 50.0%"
     assert result["period"] == {"comparison": "last 12 complete months vs the same months a year earlier",
                                 "recent": "2025-09..2026-08", "previous": "2024-09..2025-08",
                                 "chart": "2024-09..2026-08", "notes": []}

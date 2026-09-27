@@ -54,6 +54,20 @@ def _verdict(change_pct: float | None, noise_pct: float | None = None) -> str:
     return "growing" if change_pct > 0 else "declining"
 
 
+def no_change_text(pct: float, noise: float | None) -> str:
+    """How much a 'no clear change' moved, relative to the noise, without a direction.
+
+    The direction of a noise-level change means nothing, and showing it ("rose 1.6%")
+    made models report growth, so model-facing text gives only the size.
+    """
+    size = f"moved {abs(pct):.1f}%"
+    if noise is not None and abs(pct) < noise:
+        return f"{size}, within the ±{noise:.0f}% normal fluctuation"
+    if abs(pct) < MIN_EFFECT_PCT:
+        return f"{size}, below the {MIN_EFFECT_PCT:g}% needed to count as a real change"
+    return f"{size}, too little to count as a clear change"
+
+
 def _moved(pct: float, decimals: int = 1) -> str:
     """-46.4 -> 'fell 46.4%'. Reasons state directions in words, never with a sign."""
     return f"{'rose' if pct > 0 else 'fell'} {abs(pct):.{decimals}f}%"
@@ -182,12 +196,8 @@ def assess(months: list[str], article: dict[str, int], project: dict[str, int],
     elif verdict in ("growing", "declining") and noise is not None:
         conf.support.append(f"the share {_moved(share_growth_pct)}, more than the "
                             f"±{noise:.0f}% that month-to-month variation could produce")
-    elif verdict == "no_clear_change" and abs(share_growth_pct) >= MIN_EFFECT_PCT and noise is not None:
-        conf.support.append(f"the share {_moved(share_growth_pct)}, which is within the "
-                            f"±{noise:.0f}% that normal month-to-month variation could produce")
     elif verdict == "no_clear_change":
-        conf.support.append(f"the share {_moved(share_growth_pct)}, less than "
-                            f"{MIN_EFFECT_PCT:g}%, too small to matter")
+        conf.support.append(f"the share {no_change_text(share_growth_pct, noise)}")
 
     if n < SHORT_WINDOW:
         conf.cap("medium", f"only {n} month{'s' if n > 1 else ''} compared with a year earlier; "

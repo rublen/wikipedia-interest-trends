@@ -145,10 +145,18 @@ checks use. Headline share = sum of article views ÷ sum of project views per pe
 - Every result states the limit of the method: Wikipedia interest ≠ willingness to pay
   or market size; it's a signal for choosing what to validate next.
 
-### 3. Report: example #3
-- `wit.py report` → one-page PDF (chart, key numbers, ranking, recommendation,
-  assumptions, limitations); matplotlib-only to keep dependencies small.
-- Transparent, user-adjustable ranking score (users bring their own criteria).
+### 3. Report: example #3 — built; ranking and report fixed after the first Haiku batch
+- **Two output channels, on purpose.** Agent-facing output (stdout, `result.json`) states every
+  change in words and never shows a signed number; a "no clear change" gets its size relative to
+  the noise ("moved 1.6%, within the ±14% normal fluctuation") and no direction. Human-facing
+  output (the CSV and the PDF table) keeps the signed numbers. Reason: in Haiku runs, signs were
+  misread ("shrank 8.8%" reported as "grew") and noise-level directions over-read ("rose 1.6%"
+  reported as "growing"), while people read signed tables without trouble.
+- `compare … --report [--question] [--note]` → one-page A4 PDF (question, what was measured,
+  chart, ranked table, recommendation, trust reasons, method and limits); matplotlib only,
+  font fallback with a glyph check for non-Latin titles.
+- Transparent, user-adjustable ranking (`--weights`): momentum (only confirmed changes count),
+  size (log views) and confidence; a code-written `why` per language and `recommendation`.
 
 ### 4. Follow-ups & efficiency
 - On-disk cache + reuse of the query spec, so "add Slovak" or "same for 5 years" are

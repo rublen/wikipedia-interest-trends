@@ -9,9 +9,10 @@ from wikitrends.months import month_range
 from wikitrends.resolve import resolve
 
 
-def lang_result(views, share_pct, verdict, confidence="high"):
+def lang_result(views, share_pct, verdict, confidence="high", reasons=("a reason",)):
     return {"status": "ok", "avg_monthly_views_recent": views, "share_growth_pct": share_pct,
-            "trend": {"verdict": verdict, "confidence": confidence}}
+            "trend": {"verdict": verdict, "confidence": confidence, "reasons": list(reasons),
+                      "checks": {"noise_pct": 7.0}}}
 
 
 def test_weights_default_custom_and_errors():
@@ -31,17 +32,22 @@ def test_noise_level_change_does_not_count_as_momentum():
     rows = {r["lang"]: r for r in ranking.rank(langs, ranking.parse_weights(None))["languages"]}
     assert rows["vi"]["components"]["momentum"] == rows["tr"]["components"]["momentum"] == 1.0
     assert rows["ja"]["components"]["momentum"] == 0.0
-    assert "stable (share rose 1.6%, not a clear change)" in rows["vi"]["why"]
+    assert "stable: moved 1.6%, within the ±7% normal fluctuation" in rows["vi"]["why"]
+    assert "rose" not in rows["vi"]["why"]
 
 
 def test_ranking_order_explanations_and_not_ranked():
-    langs = {"de": lang_result(23_000, -0.7, "no_clear_change", "medium"),
+    langs = {"de": lang_result(23_000, -0.7, "no_clear_change", "medium", reasons=("bots",)),
              "ja": lang_result(36_000, -11.0, "declining"),
              "uk": lang_result(6_600, -14.6, "declining"),
              "pl": {"status": "no_article", "note": "long note"}}
     result = ranking.rank(langs, ranking.parse_weights(None))
     assert [r["lang"] for r in result["languages"]] == ["de", "ja", "uk"]
-    assert result["languages"][1]["why"].startswith("largest audience in the group (36,000 views/month)")
+    assert result["languages"][0]["why"] == (
+        "Ranked 1 of 3 (score 0.80): momentum 1.00, stable: moved 0.7%, within the ±7% normal "
+        "fluctuation; size 0.74, 23,000 views/month, the 2nd largest audience of 3; "
+        "confidence 0.50, medium confidence (bots)")
+    assert "36,000 views/month, the largest audience of 3" in result["languages"][1]["why"]
     assert result["not_ranked"] == {"pl": "no article on this topic in this Wikipedia"}
     # Size-only weights put the biggest audience first.
     by_size = ranking.rank(langs, ranking.parse_weights("momentum=0,size=1,confidence=0"))
@@ -54,6 +60,7 @@ def test_recommendation_cases():
     lines = ranking.recommendation(single)
     assert lines[0].startswith("Only cs could be measured, so there is nothing to rank")
     assert lines[1].startswith("Not measurable here: pl")
+    assert not any(line.startswith("Ranking weights") for line in lines)  # nothing was ranked
 
     declining = ranking.rank({"a": lang_result(5000, -12.0, "declining"),
                               "b": lang_result(4000, -20.0, "declining", "low"),
@@ -62,6 +69,7 @@ def test_recommendation_cases():
     assert lines[0].startswith("Explore next: a and b.")
     assert any(line.startswith("Check before relying on it: b") for line in lines)
     assert any("only shows where it declines least" in line for line in lines)
+    assert lines[-1].startswith("Ranking weights: momentum 0.4, size 0.4, confidence 0.2")
 
 
 # --- report ------------------------------------------------------------------
@@ -110,3 +118,16 @@ def test_no_report_unless_asked(tmp_path):
 def test_unrenderable_titles_are_detected():
     assert report.renderable("Englische Sprache Англійська мова")
     assert not report.renderable("\U000F0000")  # private-use character: no font has it
+
+
+def test_model_facing_result_has_no_signed_numbers(tmp_path):
+    client = _client(LANGS[:3])
+    resolved = resolve(client, LANGS[:3], topic="english")
+    spec = pipeline.build_spec(client, resolved, "english", LANGS[:3], 24, date(2026, 9, 25))
+    result = pipeline.analyze_spec(client, spec, tmp_path, make_report=True, note="Proxy: X")
+    text = (tmp_path / "result.json").read_text()
+    assert "_growth_pct" not in text
+    assert not re.search(r"[(\s]-\d", text), "a negative number reached the model-facing JSON"
+    assert result["topic"]["note"] == "Proxy: X"
+    # Human-facing CSV keeps the raw numbers.
+    assert (tmp_path / "monthly.csv").read_text().startswith("month,lang,article_views")

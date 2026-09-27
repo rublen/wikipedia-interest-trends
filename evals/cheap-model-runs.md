@@ -262,3 +262,54 @@ Evidence:
 - **E3a:** the proxy note is in all three PDFs (`--note`), but only r3 said it in the answer.
 - Also found: the `comparison` sentence still has signed numbers for tiny changes: "share stayed
   about the same **(-0.7%)**".
+
+## 2026-09-27 — After six fixes: example #3 ×3, regressions #2 ×1 and #1 ×1, Claude Haiku 4.5
+
+Fixes since the previous batch: (1) the duplicate "interest ≠ willingness to pay" limitation
+removed, so `scope` is the only wording; (2) a "no clear change" is described by its size
+relative to the noise, with no direction ("moved 1.6%, within the ±14% normal fluctuation"),
+in every agent-facing text; (3) agent-facing JSON has no signed numbers (changes in words;
+the CSV and PDF table keep them); (4) the recommendation includes a "Ranking weights" line;
+(5) `--note` is echoed as `topic.note`; (6) `ranking.why` names rank, score, momentum, size and
+confidence with the reason that lowered it, plus a SKILL.md rule against own business reasons.
+
+Runs: `runs/2026-09-27-haiku-ex3-run4.md`, `-run5.md`, `-run6.md`, `runs/2026-09-27-haiku-ex2-run10.md`,
+`runs/2026-09-27-haiku-ex1-run5.md`. All: 4–5 turns, 20–31 s, $0.036–0.058, no tool errors. All
+three #3 runs resolved to Q1860 with `--report --question --note "Proxy: …"`.
+
+| Item | Severity | #3 r4 | #3 r5 | #3 r6 | #2 r10 | #1 r5 | Count | Previous batch |
+|---|---|---|---|---|---|---|---|---|
+| G1 Uses the skill | critical | pass | pass | pass | pass | pass | 5/5 | 5/5 |
+| G2 Right topic | critical | pass | pass | pass | pass | pass | 5/5 | 5/5 |
+| G3 Numbers from the JSON | critical | **fail** | pass | pass | pass | pass | 4/5 | 5/5 |
+| G4 Units | critical | pass | pass | pass | pass | pass | 5/5 | 4/5 |
+| G5 Directions | critical | pass | pass | pass | pass | pass | 5/5 | 2/5 |
+| G6 Verdict and confidence | critical | pass | pass | pass | pass | pass | 5/5 | 4/5 |
+| G7 Confidence meaning quoted | minor | pass | pass | **fail** | pass | pass | 4/5 | 3/5 |
+| G8 No invented reasons | critical | **fail** | **fail** | **fail** | pass | pass | 2/5 | 3/5 |
+| G9 Scope quoted once | minor | pass | pass | **fail** | pass | pass | 4/5 | 1/5 |
+| G10 Next checks, not go/no-go | critical | pass | pass | pass (note) | pass | n/a | 4/4 | 3/4 |
+| G11 Chart path | minor | pass | pass | pass | pass | pass | 5/5 | 5/5 |
+| E1a / E2a | critical | – | – | – | pass | pass | 2/2 | 2/2 |
+| E3a Proxy stated | critical | pass | pass | pass | – | – | 3/3 | 1/3 |
+| E3b Report made and given | critical | pass | pass | pass | – | – | 3/3 | 3/3 |
+| E3c Recommendation quoted + weights | minor | pass | pass | **fail** | – | – | 2/3 | 0/3 |
+| **All items passed** | | no | no | no | yes | yes | **2/5** | 0/5 |
+| **All critical items passed** | | no | no | no | yes | yes | **2/5** | 1/5 |
+
+Failures by severity: critical 4 (previous batch 10), minor 3 (previous 9).
+
+Evidence:
+- **G8 (3/3 on #3, a different invention each time):** r4 "Spanish and Portuguese … suggesting
+  **market volatility**"; r5 labels language editions as **countries** ("Germany (de)", "Spain
+  (es)", "Portugal (pt)"), although Spanish and Portuguese Wikipedia readers are mostly outside
+  Spain and Portugal; r6 "75% of views came from detected bots, so **numbers are inflated**"
+  (detected bots are already excluded from the counted views), plus "room to grow", "mature audience".
+- **G3 (r4):** gives the compared months as "September 2024–August 2025 compared to the same
+  months a year earlier"; the recent period is Sep 2025–Aug 2026.
+- **G7, G9, E3c (r6):** paraphrased everything (no meaning, no scope sentence, recommendation
+  rewritten); it still stated the weights.
+- **G10 note (r6):** "Turkish: low-risk expansion candidate if growth is needed" edges toward a
+  go decision; the overall recommendation is "validate demand in German and Vietnamese".
+- The fixes for signs, directions, proxy and weights held: G5 5/5 (was 2/5), E3a 3/3 (was 1/3),
+  E3c weights stated 3/3 (was 0/3), G9 4/5 (was 1/5).

@@ -75,11 +75,14 @@ report it, don't hide it); `unknown_language` = wrong language code.
 Use only numbers from the JSON. The script already interprets them: **quote each
 language's `summary` and the top-level `comparison` verbatim**, word for word. Don't
 paraphrase them or add your own explanation of why numbers differ (no "despite",
-"because", "reflects"). Don't work out directions from the `_pct` fields yourself. Structure:
+"because", "reflects"). Changes are given in words (`share_change`, `views_change`,
+`project_change`); a "no clear change" has no direction on purpose, so never call it
+growth or decline. Structure:
 
-1. **What was measured**: the Wikidata item (label, description), the article title per
-   language, and `period.comparison` with the `period.recent` and `period.previous` months.
-2. **Results per language**, in `ranking_by_share_growth` order: the language's
+1. **What was measured**: the Wikidata item (label, description), `topic.note` if present
+   (e.g. that the article is a proxy), the article title per language, and
+   `period.comparison` with the `period.recent` and `period.previous` months.
+2. **Results per language**, in `ranking.languages` order: the language's
    `summary` (verbatim; it ends with the verdict, the confidence and its reasons), plus
    `avg_monthly_views_recent` for scale. Change in share is the main comparison (it
    removes differences in each Wikipedia's size and overall traffic). With 2+ languages,
@@ -91,9 +94,11 @@ paraphrase them or add your own explanation of why numbers differ (no "despite",
    If the user asks how far to trust a result, list that language's `trend.reasons`
    (verbatim). Seasonality is already handled (same months a year earlier); don't cite
    it as a weakness.
-5. **Which to explore next** (when asked): quote the `recommendation` lines verbatim.
-   They come from `ranking` (score, components and `why` per language); say which
-   `ranking.weights` were used.
+5. **Which to explore next** (when asked): quote the `recommendation` lines verbatim,
+   including the "Ranking weights" line. To explain **why** a language ranks where it
+   does, quote its `ranking.languages[].why`; it names the momentum, size and confidence
+   behind the score. Don't add business reasons of your own (market size, investment,
+   "safer bet", underserved demand, competition): the data doesn't show them.
 6. **Scope**: quote the top-level `scope` sentence once, verbatim. Add other
    `limitations` only if they matter for this question.
 7. **Files**: always give the path in `files.chart`, and `files.report` if one was made;

@@ -1,6 +1,7 @@
 """Transparent, user-adjustable ranking of language editions: which audiences to explore next.
 
-score = sum(weight * component), each component scaled 0..1 *within the compared languages*:
+score = sum(weight * component). Momentum and size are scaled 0..1 *within the compared
+languages*; confidence is already on a fixed 0..1 scale:
 - momentum:   change in share of views (higher is better); a change the trust checks call
               "no clear change" counts as 0, so noise can't win the ranking
 - size:       average monthly article views, on a log scale (sizes differ 100x between wikis)
@@ -11,6 +12,8 @@ The score only ranks the languages compared together; it is not an absolute meas
 from __future__ import annotations
 
 import math
+
+from wikitrends import trust
 
 DEFAULT_WEIGHTS = {"momentum": 0.4, "size": 0.4, "confidence": 0.2}
 CONFIDENCE_VALUE = {"high": 1.0, "medium": 0.5, "low": 0.0}
@@ -62,19 +65,24 @@ def rank(languages: dict[str, dict], weights: dict[str, float]) -> dict:
         "size": {lang: math.log10(max(r["avg_monthly_views_recent"], 1)) for lang, r in ok.items()},
         "confidence": {lang: CONFIDENCE_VALUE[r["trend"]["confidence"]] for lang, r in ok.items()},
     }
-    scaled = {name: _scaled(values) for name, values in raw.items()}
+    scaled = {"momentum": _scaled(raw["momentum"]), "size": _scaled(raw["size"]),
+              "confidence": raw["confidence"]}
     rows = []
     for lang, r in ok.items():
         components = {name: round(scaled[name][lang], 2) for name in raw}
         score = sum(weights[name] * components[name] for name in components)
+        trend = r["trend"]
+        lowered = [reason for reason in trend["reasons"] if trend["confidence"] != "high"][:1]
         rows.append({
             "lang": lang,
             "score": round(score, 2),
             "components": components,
             "avg_monthly_views": r["avg_monthly_views_recent"],
             "share_growth_pct": r["share_growth_pct"],
-            "verdict": r["trend"]["verdict"],
-            "confidence": r["trend"]["confidence"],
+            "share_change": _share_change(r),
+            "verdict": trend["verdict"],
+            "confidence": trend["confidence"],
+            "confidence_reason": lowered[0] if lowered else None,
         })
     rows.sort(key=lambda row: row["score"], reverse=True)
     for i, row in enumerate(rows, start=1):
@@ -94,26 +102,32 @@ def _momentum(r: dict) -> float:
     return r["share_growth_pct"] if r["trend"]["verdict"] in ("growing", "declining") else 0.0
 
 
+def _share_change(r: dict) -> str:
+    """The change in share in words; for 'no clear change', its size vs the noise, no direction."""
+    pct, trend = r["share_growth_pct"], r["trend"]
+    if trend["verdict"] == "no_clear_change":
+        return "stable: " + trust.no_change_text(pct, trend["checks"].get("noise_pct"))
+    return f"{trend['verdict']}: share {'rose' if pct > 0 else 'fell'} {abs(pct):.1f}%"
+
+
+def _ordinal(n: int) -> str:
+    return {1: "largest", 2: "2nd largest", 3: "3rd largest"}.get(n, f"{n}th largest")
+
+
 def _why(row: dict, rows: list[dict]) -> str:
-    """Plain-language reasons for one language's position, relative to the group."""
-    parts = []
+    """Why this language has its rank: each component with its value, in words the agent can quote."""
     n = len(rows)
-    by_size = sorted(rows, key=lambda r: r["avg_monthly_views"], reverse=True)
-    views = f"{row['avg_monthly_views']:,} views/month"
-    if n > 1 and by_size[0] is row:
-        parts.append(f"largest audience in the group ({views})")
-    elif n > 1 and by_size[-1] is row:
-        parts.append(f"smallest audience in the group ({views})")
-    else:
-        parts.append(f"audience of {views}")
-    change = row["share_growth_pct"]
-    moved = f"share {'rose' if change > 0 else 'fell'} {abs(change):.1f}%"
-    if row["verdict"] == "no_clear_change":
-        parts.append(f"stable ({moved}, not a clear change)")
-    else:
-        parts.append(f"{row['verdict']} ({moved})")
-    parts.append(f"{row['confidence']} confidence")
-    return "; ".join(parts)
+    size_rank = sorted(rows, key=lambda r: r["avg_monthly_views"], reverse=True).index(row) + 1
+    c = row["components"]
+    size = f"{row['avg_monthly_views']:,} views/month"
+    if n > 1:
+        size += f", the {_ordinal(size_rank)} audience of {n}"
+    confidence = f"{row['confidence']} confidence"
+    if row["confidence_reason"]:
+        confidence += f" ({row['confidence_reason']})"
+    head = f"Ranked {row['rank']} of {n} (score {row['score']:.2f})" if n > 1 else "Only language ranked"
+    return (f"{head}: momentum {c['momentum']:.2f}, {row['share_change']}; "
+            f"size {c['size']:.2f}, {size}; confidence {c['confidence']:.2f}, {confidence}")
 
 
 def recommendation(ranking: dict) -> list[str]:
@@ -125,13 +139,12 @@ def recommendation(ranking: dict) -> list[str]:
                     + " (no comparable article data).") if ranking["not_ranked"] else None
     if len(rows) == 1:
         only = rows[0]
-        lines = [f"Only {only['lang']} could be measured, so there is nothing to rank: {only['why']}."]
+        lines = [f"Only {only['lang']} could be measured, so there is nothing to rank. {only['why']}."]
         return lines + ([not_measured] if not_measured else [])
     lines = []
     top = rows[:2] if len(rows) > 2 else rows[:1]
     names = " and ".join(r["lang"] for r in top)
-    lines.append(f"Explore next: {names}. " + " ".join(
-        f"{r['lang']}: {r['why']}." for r in top))
+    lines.append(f"Explore next: {names}. " + " ".join(f"{r['lang']}: {r['why']}." for r in top))
     shaky = [r for r in top if r["confidence"] == "low"]
     if shaky:
         lines.append("Check before relying on it: " + ", ".join(r["lang"] for r in shaky)
@@ -144,4 +157,8 @@ def recommendation(ranking: dict) -> list[str]:
         lines.append(f"Lower priority on this evidence: {', '.join(rest)}.")
     if not_measured:
         lines.append(not_measured)
+    w = ranking["weights"]
+    lines.append(f"Ranking weights: momentum {w['momentum']:g}, size {w['size']:g}, confidence "
+                 f"{w['confidence']:g}; momentum and size are scaled 0-1 within these languages, so "
+                 "the score only compares them with each other.")
     return lines

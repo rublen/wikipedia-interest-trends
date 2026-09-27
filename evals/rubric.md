@@ -32,6 +32,15 @@ Score each item **pass**, **fail**, or **n/a** (the item doesn't apply to this r
 | E3b | Example #3 | A report was made (`--report`, `--question`) and `files.report` is given |
 | E3c | Example #3 | The `recommendation` lines are quoted (not rewritten into a go/no-go) and the weights used are stated |
 
+## Severity
+
+- **Critical**: a failure would mislead the reader or fail the task: G1, G2, G3, G4, G5, G6,
+  G8, G10, E1a, E2a, E3a, E3b.
+- **Minor**: quoting or completeness; the answer is still correct: G7, G9, G11, E3c.
+
+Each batch reports, per answer, two rows: **all items passed** and **all critical items
+passed**, plus the item counts split by severity.
+
 ## How runs are scored
 
 The scorer is the developing agent (Claude) reading each transcript against this rubric,

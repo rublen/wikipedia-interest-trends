@@ -71,7 +71,7 @@ def analyze_language(months: list[str], article: dict[str, int], project: dict[s
     }
     trend = trust.assess(months, article, project, result["share_growth_pct"],
                          result["views_growth_pct"], automated, window)
-    summary = summarize(lang, result, trend["verdict"]) + " " + trust.sentence(trend)
+    summary = summarize(lang, result, trend) + " " + trust.sentence(trend)
     return {"summary": summary, "trend": trend, **result}
 
 
@@ -79,18 +79,25 @@ def analyze_language(months: list[str], article: dict[str, int], project: dict[s
 UNCHANGED_PCT = 1.0
 
 
-def _change(pct: float, up: str = "rose", down: str = "fell") -> str:
+def change_text(pct: float, up: str = "rose", down: str = "fell") -> str:
     """-8.8 -> 'fell 8.8%'. Signs become words, so a reader can't misread a minus sign."""
     if abs(pct) < UNCHANGED_PCT:
-        return f"stayed about the same ({pct:+.1f}%)"
+        return "stayed about the same (less than 1% change)"
     return f"{up if pct > 0 else down} {abs(pct):.1f}%"
 
 
-def summarize(lang: str, r: dict, verdict: str | None = None) -> str:
+def share_change_text(share_pct: float, trend: dict) -> str:
+    """Model-facing description of the change in share: a direction only if the verdict confirms it."""
+    if trend["verdict"] == "no_clear_change":
+        return trust.no_change_text(share_pct, trend["checks"].get("noise_pct"))
+    return change_text(share_pct)
+
+
+def summarize(lang: str, r: dict, trend: dict | None = None) -> str:
     """One plain-language interpretation of a language's numbers, written by code, not the agent.
 
-    With `verdict` "no_clear_change", small changes are not described as gaining or losing
-    ground, so the sentence can't contradict the verdict that follows it.
+    With a "no_clear_change" verdict the change in share is described by its size relative to
+    the noise, without a direction, so the sentence can't be read as growth or decline.
     """
     views, share, project = r["views_growth_pct"], r["share_growth_pct"], r["project_growth_pct"]
     if r["views_recent"] == 0 and r["views_previous"] == 0:
@@ -99,14 +106,15 @@ def summarize(lang: str, r: dict, verdict: str | None = None) -> str:
         return "The article had no views in the previous window, so growth can't be computed."
 
     n = r.get("months_compared", 12)
-    text = (f"Article views {_change(views)} ({r['views_previous']:,} -> {r['views_recent']:,} views "
+    text = (f"Article views {change_text(views)} ({r['views_previous']:,} -> {r['views_recent']:,} views "
             f"in total over the {n} compared month{'s' if n > 1 else ''}). "
-            f"The whole {lang} Wikipedia {_change(project, 'grew', 'shrank')} over the same time, "
-            f"so the article's share of all views {_change(share)}")
+            f"The whole {lang} Wikipedia {change_text(project, 'grew', 'shrank')} over the same time, "
+            f"so the article's share of all views ")
+    if trend and trend["verdict"] == "no_clear_change":
+        return text + share_change_text(share, trend) + ": no clear change in either direction."
+    text += change_text(share)
     if abs(share) < UNCHANGED_PCT:
         return text + ": interest kept pace with the rest of that Wikipedia."
-    if verdict == "no_clear_change":
-        return text + ", which is not a clear change in either direction."
     direction = "gained" if share > 0 else "lost"
     text += f": it {direction} ground relative to the rest of that Wikipedia."
     if views < -UNCHANGED_PCT and share > UNCHANGED_PCT:
@@ -116,19 +124,28 @@ def summarize(lang: str, r: dict, verdict: str | None = None) -> str:
     return text
 
 
+def _order_key(r: dict) -> tuple[int, float]:
+    """Growing (biggest first), then no clear change, then declining (smallest decline first)."""
+    verdict = r["trend"]["verdict"]
+    if verdict == "no_clear_change":
+        return (1, 0.0)
+    return (0 if verdict == "growing" else 2, -r["share_growth_pct"])
+
+
 def comparison(languages: dict[str, dict]) -> str | None:
-    """Rank languages by change in share, in words (None if fewer than two)."""
-    ranked = sorted(((lang, r["share_growth_pct"]) for lang, r in languages.items()
-                     if r.get("share_growth_pct") is not None), key=lambda x: x[1], reverse=True)
+    """Order languages by change in share, in words (None if fewer than two)."""
+    ranked = sorted((lang for lang, r in languages.items()
+                     if r.get("share_growth_pct") is not None and r.get("trend")),
+                    key=lambda lang: _order_key(languages[lang]))
     if len(ranked) < 2:
         return None
     parts = []
-    for lang, pct in ranked:
-        trend = languages[lang].get("trend")
-        suffix = (f", {trend['verdict'].replace('_', ' ')} with {trend['confidence']} confidence"
-                  if trend else "")
-        parts.append(f"{lang} (share {_change(pct)}{suffix})")
-    return "Ranked by change in share of attention, best first: " + ", ".join(parts) + "."
+    for lang in ranked:
+        r = languages[lang]
+        trend = r["trend"]
+        parts.append(f"{lang} (share {share_change_text(r['share_growth_pct'], trend)}, "
+                     f"{trend['verdict'].replace('_', ' ')} with {trend['confidence']} confidence)")
+    return "By change in share of attention, strongest first: " + "; ".join(parts) + "."
 
 
 def monthly_share(article: dict[str, int], project: dict[str, int]) -> dict[str, float | None]:

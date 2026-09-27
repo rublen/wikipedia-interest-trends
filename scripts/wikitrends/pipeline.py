@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import csv
 import json
 import re
@@ -21,8 +22,9 @@ SPEC_VERSION = 2  # 2: year-on-year comparison window
 SCOPE = ("Pageviews measure reader interest on Wikipedia, not willingness to pay or market size: "
          "use this to choose what to validate next, not to decide on its own.")
 
+# (The "interest is not willingness to pay" limitation is the `scope` sentence above; a second,
+# similar wording here made agents quote one or the other.)
 LIMITATIONS = [
-    "Pageviews measure curiosity among Wikipedia readers, not willingness to pay or market size.",
     "One Wikidata item = one article per language; related articles and redirects are not counted.",
     "agent=user excludes identified bots, but undetected bots can remain (classification improved in April 2020).",
     "Confidence comes from rules of thumb (volume, spikes, consistency, noise, data artifacts), not a statistical model.",
@@ -150,7 +152,7 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path, weights: dict[str, f
     result = {
         "status": "ok",
         "topic": {"query": spec["query"], "qid": spec["qid"], "label": spec["label"],
-                  "description": spec["description"]},
+                  "description": spec["description"], "note": note},
         "period": {"comparison": f"last {window} complete month{'s' if window > 1 else ''} vs the "
                                  "same months a year earlier",
                    "recent": f"{recent[0]}..{recent[-1]}", "previous": f"{previous[0]}..{previous[-1]}",
@@ -202,8 +204,35 @@ def analyze_spec(client: Client, spec: dict, out_dir: Path, weights: dict[str, f
     result["files"]["data"] = str(csv_path)
     result_path = out_dir / "result.json"
     result["files"]["result"] = str(result_path)
+    result = model_facing(result)
     write_json(result_path, result)
     return result
+
+
+def model_facing(result: dict) -> dict:
+    """The result as agents see it (stdout, result.json): changes in words, no signed numbers.
+
+    Human-facing outputs (the CSV and the PDF table) keep the signed numbers. Agents read
+    words instead: a sign is easy to misread, and the direction of a noise-level change is
+    easy to over-read ("rose 1.6%" became "growing" in agent answers), so a "no clear change"
+    is described by its size relative to the noise, without a direction.
+    """
+    out = copy.deepcopy(result)
+    for r in out["languages"].values():
+        if r.get("status") != "ok":
+            continue
+        trend = r["trend"]
+        share, views, project = (r.pop("share_growth_pct"), r.pop("views_growth_pct"),
+                                 r.pop("project_growth_pct"))
+        r["share_change"] = analyze.share_change_text(share, trend) if share is not None else None
+        r["views_change"] = analyze.change_text(views) if views is not None else None
+        r["project_change"] = analyze.change_text(project, "grew", "shrank") if project is not None else None
+        median = trend["checks"].pop("median_share_growth_pct", None)
+        if median is not None and trend["verdict"] in ("growing", "declining"):
+            trend["checks"]["median_share_change"] = analyze.change_text(median)
+    for row in out["ranking"]["languages"]:
+        row.pop("share_growth_pct", None)
+    return out
 
 
 def _write_csv(path: Path, months: list[str], data: dict[str, dict]) -> None:

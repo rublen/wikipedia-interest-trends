@@ -160,6 +160,11 @@ def _render(path, result, months, plotted, compared, order, lang_names, question
     # Recommendation, written by code from the ranking.
     page.heading("Audiences to explore next")
     for line in result["recommendation"]:
+        if line.startswith("Explore next:"):
+            # The table and the trust section show the details; the full "why" is in result.json.
+            line = line.split(". ", 1)[0] + " (details in the table above and the reasons below)."
+        elif line.startswith("Ranking weights:"):
+            continue  # stated in "How the ranking works"
         page.text("• " + line, gap=0.002)
 
     # Trust: the meaning of each level once, then each language's main reasons.
@@ -178,10 +183,10 @@ def _render(path, result, months, plotted, compared, order, lang_names, question
     w = ranking["weights"]
     page.text(f"Score = {w['momentum']:g} × momentum (change in share) + {w['size']:g} × size (average "
               f"monthly views, log scale) + {w['confidence']:g} × confidence (high 1, medium 0.5, low 0). "
-              "Each part is scaled 0–1 within the compared languages, so the score ranks only this group. "
-              "Weights can be changed (--weights).", gap=0.002)
+              "Momentum and size are scaled 0–1 within the compared languages, so the score ranks only "
+              "this group. Weights can be changed (--weights).", gap=0.002)
     page.text(result["scope"], gap=0.002)
-    for limitation in result["limitations"][1:2 if compact else 3]:
+    for limitation in result["limitations"][:1 if compact else 2]:
         page.text(limitation, gap=0.002)
 
     fig.text(LEFT, 0.028, f"Source: Wikimedia Pageviews API (monthly, agent=user) and Wikidata. "
