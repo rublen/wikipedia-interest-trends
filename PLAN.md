@@ -217,17 +217,18 @@ verdicts and confidence (G4 7/7, G6 7/7).
   level, the scope sentence and the recommendation are often reworded.
 - Single-language answers (#1, #2) are mostly correct; errors concentrate in 8-language synthesis.
 
-**Untested hypotheses, for the roadmap:**
-1. *Too much output.* The agent-facing JSON for 8 languages is ~5,300 tokens and SKILL.md
-   1,095 words, with competing instructions ("start from key_findings" vs "quote each summary").
-   Try progressive disclosure: a compact default (topic, key findings, one line per language,
-   recommendation, scope, files) and `--details` for per-language depth.
+**Roadmap items from tuning:**
+1. *Too much output.* **Done and tested:** compact default output for more than 2 languages,
+   `--details` for depth (last tuning batch: key findings quoted 5/5, critical failures 10 → 5).
 2. *A ready-to-quote answer.* If the compact output still leaves the model writing its own
    cross-language sentences, the script writes the whole answer as Markdown and the model only
    adds context (the fallback discussed earlier).
-3. *Guard proxies in `resolve`.* When the chosen item is a work, programme or organisation
-   (Wikidata "instance of"), return `ambiguous` with the concept candidates instead of
-   auto-picking, since describing the wrong entity didn't stop the model from using it.
+3. *Guard proxies in `resolve`.* **Done differently:** activity phrases ("learning X", "X courses")
+   are never auto-picked. The Wikidata "instance of" version was rejected (see finding 6).
+4. *Automatic quote check in the evals.* A free model (Nemotron) put an invented sentence in
+   quotation marks and attributed it to the tool ("— recommendation"). A script can check that
+   every quoted string in an answer appears verbatim in the JSON the model received; this turns
+   part of G3 from reading into a mechanical check.
 
 ### 4. Follow-ups & efficiency
 - On-disk cache + reuse of the query spec, so "add Slovak" or "same for 5 years" are

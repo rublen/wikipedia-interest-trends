@@ -548,3 +548,90 @@ Reading: moving the comparisons into code and removing the competing text fixed 
 cross-language errors. What remains is the model's own interpretation when the user asks
 "why" — the one part of the answer the script doesn't write. That is what a ready-to-quote
 answer (roadmap) would address.
+
+## 2026-09-27 — User-driven runs (holdout wording): Haiku via Claude Code, free models via OpenRouter
+
+Driven by the user in their own Claude Code sessions (skill installed as
+`~/.claude/skills/wikipedia-interest-trends`, empty working folder), with **their own prompt**,
+not one the format was tuned on:
+
+> Compare interest in "English language" learning topic across Wikipedia editions: Ukrainian,
+> Polish, German, Spanish, Portuguese, Turkish, Japanese, and Vietnamese. Provide insights on
+> which audiences have highest interest and growth potential for a language-learning app.
+
+Three sessions; two are scored:
+- `runs/2026-09-27-user-haiku-claude-code.md`: **Claude Haiku 4.5**, the user's Claude account.
+- `runs/2026-09-27-user-openrouter-free.md`: **`openrouter/free`** through OpenRouter's
+  Anthropic-compatible endpoint. The router switched between **five free models within the run**
+  (setup, both `compare` calls and the final answer came from different models; the final answer
+  from dots-studio/dots-3-note-preview), so it tests "some free model", not one model.
+- Not scored: a third session with `anthropic/claude-haiku-4.5` via OpenRouter stopped at
+  `402 Insufficient credits` before any model answered (setup check only).
+
+| Item | Severity | Haiku (Claude Code) | Free models (OpenRouter) |
+|---|---|---|---|
+| G1 Uses the skill | critical | pass | pass |
+| G2 Right topic | critical | pass | pass |
+| G3 Numbers from the JSON | critical | **fail** | pass |
+| G4 Units | critical | pass | pass |
+| G5 Directions | critical | pass | pass |
+| G6 Verdict and confidence | critical | pass | pass |
+| G7 Confidence meaning quoted | minor | pass | pass |
+| G8 No invented reasons | critical | **fail** | pass |
+| G9 Scope quoted once | minor | pass | pass |
+| G10 Next checks, not go/no-go | critical | pass | pass |
+| G11 Chart path | minor | pass | pass |
+| E3a Proxy stated | critical | pass | pass |
+| E3b Report made and given | critical | pass | pass |
+| E3c Recommendation quoted + weights | minor | pass | pass |
+| **All items passed** | | no | **yes** |
+| **All critical items passed** | | no | **yes** |
+
+Evidence:
+- **Haiku, G3:** "German has the **largest audience size** (3rd overall)": German is the 3rd
+  largest; the sentence contradicts itself and `key_findings` (largest: ja).
+- **Haiku, G8:** "declining interest suggests potential **market saturation or shifting user
+  behavior**"; the same kind of own "why" as in the last tuning batch.
+- **Haiku, otherwise:** quoted all key findings, the comparison, every confidence meaning (in a
+  table), the full recommendation with weights and the scope sentence.
+- **Free models:** quoted everything in order (key findings, comparison, every per-language line
+  with its meaning, recommendation, weights, scope) and wrote a "bottom line" built only from
+  those facts ("German and Vietnamese … both are stable with the largest audiences among the
+  stable group"; "Spanish and Portuguese declines are low-confidence and driven by a few unusual
+  months"). The first `compare` call left out `--report`; the next model reran it with `--report
+  --question --note`.
+
+Reading: with a new wording, the same pattern as the last tuning batch: code-written facts
+quoted correctly by both; the only failures are in Haiku's own interpretation paragraph. The
+free-model run passing every item is one run with a router mixing five models, so it shows the
+skill *can* work end to end on free models, not how reliably.
+
+### User-driven run: one pinned free model, `nvidia/nemotron-3.5-lightning:free` via OpenRouter
+
+`runs/2026-09-27-user-openrouter-nemotron.md`. Same prompt as above; a single model for the whole
+run (7 replies), no tool errors; ran `compare "English language" --langs uk,pl,de,es,pt,tr,ja,vi`
+without `--report` or `--note` (the prompt didn't ask for a report, so E3b is n/a).
+
+| Item | Severity | Result | Evidence |
+|---|---|---|---|
+| G1 Uses the skill | critical | pass | skill → `compare` (setup already done) |
+| G2 Right topic | critical | pass | Q1860 |
+| G3 Numbers / facts from the JSON | critical | **fail** | **invented quotation with attribution:** *"No language showed actual growth in share … The 'stable' ones … represent the most reliable audiences for a language-learning app." — recommendation* (checked: not in the output); "vi: **highest confidence of all languages**" (tr, ja and uk are high too); "pl & uk: **smallest audiences**" (tr is smaller than pl); "uk: share fell in **14 of 12 months**?" |
+| G4 Units | critical | pass | |
+| G5 Directions | critical | pass | |
+| G6 Verdict and confidence | critical | pass | per-language table correct |
+| G7 Confidence meaning quoted | minor | **fail** | not included |
+| G8 No invented reasons | critical | **fail** | "Southeast Asian market with **growing English learning demand**"; "may indicate **market saturation**"; "**consider localization**" |
+| G9 Scope quoted once | minor | pass | quoted |
+| G10 Next checks, not go/no-go | critical | **fail** | "Both should be **deprioritized for new app features**"; a Primary/Secondary/Deprioritize table |
+| G11 Chart path | minor | **fail** | no files given |
+| E3a Proxy stated | critical | **fail** | no proxy note, not mentioned |
+| E3b Report | critical | n/a | not requested |
+| E3c Recommendation quoted + weights | minor | **fail** | weights stated; recommendation partly quoted plus the invented quote above |
+| **All critical items passed** | | **no** | |
+
+New failure type: **a fabricated quote in quotation marks, attributed to the tool output.** Quote
+marks alone don't prove a quote is real. This can be checked mechanically: every quoted string in
+an answer should appear verbatim in the JSON the model received (see roadmap: automatic quote check).
+It also qualifies the earlier `openrouter/free` result: that run's final answer came from a
+different free model (dots-3-note), and free models clearly differ in how faithfully they quote.
