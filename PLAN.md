@@ -233,6 +233,20 @@ verdicts and confidence (G4 7/7, G6 7/7).
    is sent (e.g. `wit.py check-answer`), so an invented quote or number is caught at the source:
    finding 6 ("guards belong in code") applied to the answer itself.
 
+### Holdout (2026-09-27, code frozen at `aa7c253`, details in `evals/holdout.md`)
+Seven scenarios never used for tuning, 2 Haiku runs each: **all critical items passed in 8 of 14**.
+Robust: missing/new editions and follow-up questions (4/4). Weak: topic resolution (a plural,
+"apples", resolved to the plant genus; one guess after `ambiguous`), non-English use (proxy not
+stated in Ukrainian answers; checker false positives on decimal commas), and the level-shift
+reason on a real news spike (blames "search engine, bots, rename" when a news cycle ended).
+Grounding checker: 2 of 14 runs false positives (decimal commas), no misses, but the holdout had
+no fabrications, so its sensitivity remains measured only on the tuned set.
+
+Roadmap items from the holdout: "end of a news event" in the level-shift reason, and telling a
+spike's end from a lasting shift; singular/plural fallback in `resolve`; stop-on-ambiguous
+enforced in code; proxy statement in code-written text so it survives translation; decimal
+commas in the checker.
+
 ### 4. Follow-ups & efficiency
 - On-disk cache + reuse of the query spec, so "add Slovak" or "same for 5 years" are
   cheap.
