@@ -28,7 +28,7 @@ I'll analyze pickleball interest across Czech, Polish, and German Wikipedia usin
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/setup.sh"
+ "command": "<SKILL_DIR>/setup.sh"
 }
 ```
 
@@ -37,7 +37,7 @@ I'll analyze pickleball interest across Czech, Polish, and German Wikipedia usin
 ```
 setup: using uv (uv 0.12.18 (Homebrew 2026-09-22 aarch64-apple-darwin))
 setup: OK - run the skill with exactly this command prefix:
-/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py
+<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py
 ```
 </details>
 
@@ -45,7 +45,7 @@ setup: OK - run the skill with exactly this command prefix:
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"pickleball\" --langs cs,pl,de"
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"pickleball\" --langs cs,pl,de"
 }
 ```
 
@@ -136,7 +136,7 @@ setup: OK - run the skill with exactly this command prefix:
 
 **Scope:** "Pageviews measure reader interest on Wikipedia, not willingness to pay or market size: use this to choose what to validate next, not to decide on its own."
 
-**Chart:** [saved to `/Users/mymac/home/wikipedia-interest-trends/output/Q866224-pickleball/chart.png`]
+**Chart:** [saved to `<repo>/output/Q866224-pickleball/chart.png`]
 
 ---
 

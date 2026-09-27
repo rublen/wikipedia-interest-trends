@@ -24,7 +24,7 @@ Launching skill: wikipedia-interest-trends
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/setup.sh",
+ "command": "<SKILL_DIR>/setup.sh",
  "description": "Set up the Wikipedia interest trends skill"
 }
 ```
@@ -41,7 +41,7 @@ setup: OK - run with: .venv/bin/python scripts/wit.py --help
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24",
  "description": "Analyze mercury interest in Ukrainian and Polish Wikipedia over the last 2 years"
 }
 ```
@@ -115,7 +115,7 @@ For a chemistry app, you mean the chemical element (mercury, Hg). Let me pull th
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24 --qid Q925",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24 --qid Q925",
  "description": "Analyze mercury (chemical element) interest in Ukrainian and Polish Wikipedia"
 }
 ```
@@ -189,7 +189,7 @@ For a chemistry app, you mean the chemical element (mercury, Hg). Let me pull th
 
 **Caveats:** These numbers are indicative—no confidence level is computed yet. Pageviews measure curiosity among Wikipedia readers, not willingness to market a course. The data excludes identified bots but may include undetected ones.
 
-**Chart & data:** [`chart.png`](/Users/mymac/home/wikipedia-interest-trends/output/Q925-mercury/chart.png) and [`monthly.csv`](/Users/mymac/home/wikipedia-interest-trends/output/Q925-mercury/monthly.csv)
+**Chart & data:** [`chart.png`](<repo>/output/Q925-mercury/chart.png) and [`monthly.csv`](<repo>/output/Q925-mercury/monthly.csv)
 
 For a chemistry learning app, interest in mercury is moving *away* from both these markets over the past year.
 

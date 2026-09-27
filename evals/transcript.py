@@ -10,9 +10,32 @@ Usage: python evals/transcript.py runs/<run>.jsonl > runs/<run>.md
 from __future__ import annotations
 
 import json
+import re
 import sys
+from pathlib import Path
 
 MAX_RESULT_CHARS = 1500
+REPO = Path(__file__).resolve().parents[1]
+
+# Local paths are replaced by placeholders: they add noise and reveal the local user name.
+#   <SKILL_DIR> the installed skill (in these runs, a link to this repository)
+#   <SANDBOX>   the empty working folder the agent ran in
+#   <repo>      this repository;  ~  the home directory
+_SCRATCH = r"/private/tmp/claude-\d+/[^\s/]+/[0-9a-f-]+/scratchpad"
+_PATHS = [
+    (re.compile(_SCRATCH + r"/sandbox[^/\s]*/\.claude/skills/wikipedia-interest-trends"), "<SKILL_DIR>"),
+    (re.compile(_SCRATCH + r"/sandbox[^/\s]*"), "<SANDBOX>"),
+    (re.compile(_SCRATCH), "<SCRATCH>"),
+    (re.compile(re.escape(str(Path.home() / ".claude/skills/wikipedia-interest-trends"))), "<SKILL_DIR>"),
+    (re.compile(re.escape(str(REPO))), "<repo>"),
+    (re.compile(re.escape(str(Path.home()))), "~"),
+]
+
+
+def sanitize(text: str) -> str:
+    for pattern, placeholder in _PATHS:
+        text = pattern.sub(placeholder, text)
+    return text
 
 
 def _text(content) -> str:
@@ -54,7 +77,7 @@ def convert(lines: list[str]) -> str:
         elif kind == "result":
             out.append(f"---\n\nTurns: {event.get('num_turns')} · Duration: {event.get('duration_ms', 0) / 1000:.0f} s"
                        f" · Cost: ${event.get('total_cost_usd', 0):.4f}\n")
-    return "\n".join(out)
+    return sanitize("\n".join(out))
 
 
 if __name__ == "__main__":

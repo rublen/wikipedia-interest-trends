@@ -24,7 +24,7 @@ Launching skill: wikipedia-interest-trends
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"Mercury\" --langs de --months 24"
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"Mercury\" --langs de --months 24"
 }
 ```
 

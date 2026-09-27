@@ -3,6 +3,10 @@
 Full scenarios run headless on a cheap model with the skill installed, to find friction
 in `SKILL.md` and the CLI output. Transcripts are in `runs/` as Markdown, converted with `transcript.py`; the raw stream-json logs stay local (gitignored) because they contain session metadata.
 
+Local paths in the transcripts are replaced by placeholders (`transcript.py`): `<SKILL_DIR>` is
+the installed skill (in these runs a link to this repository), `<SANDBOX>` the empty working
+folder the agent ran in, `<repo>` this repository, `~` the home directory.
+
 Setup: a scratch directory with `.claude/skills/wikipedia-interest-trends` symlinked to
 this repo, `claude -p --model claude-haiku-4-5-20251001 --setting-sources project`
 (no personal settings or memory), and an allowlist limited to `Skill`, `Read`,

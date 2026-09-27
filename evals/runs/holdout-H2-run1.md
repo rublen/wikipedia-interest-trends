@@ -32,7 +32,7 @@ I'll set up the skill and run the comparison for apples in Polish and Czech Wiki
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/setup.sh",
+ "command": "<SKILL_DIR>/setup.sh",
  "description": "Set up the Wikipedia interest trends skill"
 }
 ```
@@ -42,7 +42,7 @@ I'll set up the skill and run the comparison for apples in Polish and Czech Wiki
 ```
 setup: using uv (uv 0.12.18 (Homebrew 2026-09-22 aarch64-apple-darwin))
 setup: OK - run the skill with exactly this command prefix:
-/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py
+<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py
 ```
 </details>
 
@@ -50,7 +50,7 @@ setup: OK - run the skill with exactly this command prefix:
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"apple\" --langs pl,cs --months 24",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"apple\" --langs pl,cs --months 24",
  "description": "Compare apple interest in Polish and Czech Wikipedia over 24 months"
 }
 ```
@@ -119,7 +119,7 @@ setup: OK - run the skill with exactly this command prefix:
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"apple\" --langs pl,cs --months 24 --qid Q89",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"apple\" --langs pl,cs --months 24 --qid Q89",
  "description": "Compare apple (fruit) interest in Polish and Czech Wikipedia over 24 months"
 }
 ```
@@ -192,7 +192,7 @@ By change in share of attention, strongest first: cs (share fell 12.1%, declinin
 Pageviews measure reader interest on Wikipedia, not willingness to pay or market size: use this to choose what to validate next, not to decide on its own.
 
 **Chart:**
-![Apple interest comparison](file:///Users/mymac/home/wikipedia-interest-trends/output/Q89-apple/chart.png)
+![Apple interest comparison](file://<repo>/output/Q89-apple/chart.png)
 
 Both Polish and Czech readers show declining interest in apple articles over the past two years. Polish Wikipedia has a larger audience but lower confidence in the trend, while Czech shows medium confidence but fewer views overall.
 

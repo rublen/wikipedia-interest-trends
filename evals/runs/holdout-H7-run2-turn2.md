@@ -8,7 +8,7 @@
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox-h7-2/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox-h7-2/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"yoga\" --langs uk,pl,de --weights momentum=0.2,size=0.6,confidence=0.2 --qid Q9350",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"yoga\" --langs uk,pl,de --weights momentum=0.2,size=0.6,confidence=0.2 --qid Q9350",
  "description": "Compare yoga interest in Ukrainian, Polish, and German Wikipedia with size-weighted ranking"
 }
 ```
@@ -83,7 +83,7 @@
 **Scope:**
 "Pageviews measure reader interest on Wikipedia, not willingness to pay or market size: use this to choose what to validate next, not to decide on its own."
 
-**Chart:** `/Users/mymac/home/wikipedia-interest-trends/output/Q9350-yoga/chart.png`
+**Chart:** `<repo>/output/Q9350-yoga/chart.png`
 
 With size weighted more heavily, German Wikipedia stands out as the largest and most stable audience, showing no clear change. Polish remains the second priority, while Ukrainian—though showing the steepest decline—has the smallest audience and lowest confidence due to low volume.
 

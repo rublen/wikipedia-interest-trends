@@ -24,7 +24,7 @@ Launching skill: wikipedia-interest-trends
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/setup.sh",
+ "command": "<SKILL_DIR>/setup.sh",
  "description": "Set up the Wikipedia interest trends skill"
 }
 ```
@@ -41,7 +41,7 @@ setup: OK - run with: .venv/bin/python scripts/wit.py --help
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24",
  "description": "Analyze mercury interest trends in Ukrainian and Polish Wikipedia"
 }
 ```
@@ -111,7 +111,7 @@ setup: OK - run with: .venv/bin/python scripts/wit.py --help
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24 --qid Q925",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24 --qid Q925",
  "description": "Analyze mercury (chemical element) interest trends in Ukrainian and Polish Wikipedia"
 }
 ```

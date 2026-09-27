@@ -28,7 +28,7 @@ I'll analyze interest in mercury across Ukrainian and Polish Wikipedia using the
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/setup.sh"
+ "command": "<SKILL_DIR>/setup.sh"
 }
 ```
 
@@ -44,7 +44,7 @@ setup: OK - run with: .venv/bin/python scripts/wit.py --help
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24"
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24"
 }
 ```
 
@@ -117,7 +117,7 @@ For your chemistry app, I'm guessing you mean the chemical element mercury (Hg).
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24 --qid Q925"
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"mercury\" --langs uk,pl --months 24 --qid Q925"
 }
 ```
 
@@ -177,10 +177,10 @@ For your chemistry app, I'm guessing you mean the chemical element mercury (Hg).
   "uk"
  ],
  "files": {
-  "chart": "/Users/mymac/home/wikipedia-interest-trends/output/Q925-mercury/chart.png",
-  "data": "/Users/mymac/home/wikipedia-interest-trends/output/Q925-mercury/monthly.csv",
-  "result": "/Users/mymac/home/wikipedia-interest-trends/output/Q925-mercury/result.json",
-  "spec": "/Users/mymac/home/wikipedia-int
+  "chart": "<repo>/output/Q925-mercury/chart.png",
+  "data": "<repo>/output/Q925-mercury/monthly.csv",
+  "result": "<repo>/output/Q925-mercury/result.json",
+  "spec": "~/home/wikipedia-int
 … [548 more chars]
 ```
 </details>
@@ -211,8 +211,8 @@ Both show declining reader interest over the last two years. Polish has much mor
 **Note**: These numbers measure Wikipedia curiosity among readers—not school curriculum demand, textbook adoption, or actual learning app interest. The decline might reflect seasonal patterns, Wikipedia coverage shifts, or broader reader interests changing, rather than chemistry interest waning.
 
 The detailed data and chart are available at:
-- Chart: `/Users/mymac/home/wikipedia-interest-trends/output/Q925-mercury/chart.png`
-- Raw data: `/Users/mymac/home/wikipedia-interest-trends/output/Q925-mercury/monthly.csv`
+- Chart: `<repo>/output/Q925-mercury/chart.png`
+- Raw data: `<repo>/output/Q925-mercury/monthly.csv`
 
 ---
 

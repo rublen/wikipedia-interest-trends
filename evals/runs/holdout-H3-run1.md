@@ -24,7 +24,7 @@ Launching skill: wikipedia-interest-trends
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/setup.sh",
+ "command": "<SKILL_DIR>/setup.sh",
  "description": "Check environment setup for wikipedia-interest-trends skill"
 }
 ```
@@ -34,7 +34,7 @@ Launching skill: wikipedia-interest-trends
 ```
 setup: using uv (uv 0.12.18 (Homebrew 2026-09-22 aarch64-apple-darwin))
 setup: OK - run the skill with exactly this command prefix:
-/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py
+<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py
 ```
 </details>
 
@@ -42,7 +42,7 @@ setup: OK - run the skill with exactly this command prefix:
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"Java\" --langs pl",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"Java\" --langs pl",
  "description": "Analyze Java interest trends on Polish Wikipedia"
 }
 ```
@@ -116,7 +116,7 @@ setup: OK - run the skill with exactly this command prefix:
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"Java\" --langs pl --qid Q251",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"Java\" --langs pl --qid Q251",
  "description": "Analyze Java programming language interest on Polish Wikipedia"
 }
 ```
@@ -183,7 +183,7 @@ The Java article averaged 1,356 views per month in the recent period, down from 
 
 **Scope:** "Pageviews measure reader interest on Wikipedia, not willingness to pay or market size: use this to choose what to validate next, not to decide on its own."
 
-The data is visualized in the chart at `/Users/mymac/home/wikipedia-interest-trends/output/Q251-java/chart.png`.
+The data is visualized in the chart at `<repo>/output/Q251-java/chart.png`.
 
 ---
 

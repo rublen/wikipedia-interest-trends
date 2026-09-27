@@ -28,7 +28,7 @@ I'll check interest trends in chess on German Wikipedia using the Wikipedia Inte
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/setup.sh",
+ "command": "<SKILL_DIR>/setup.sh",
  "description": "Set up the Wikipedia Interest Trends skill"
 }
 ```
@@ -38,7 +38,7 @@ I'll check interest trends in chess on German Wikipedia using the Wikipedia Inte
 ```
 setup: using uv (uv 0.12.18 (Homebrew 2026-09-22 aarch64-apple-darwin))
 setup: OK - run the skill with exactly this command prefix:
-/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py
+<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py
 ```
 </details>
 
@@ -46,7 +46,7 @@ setup: OK - run the skill with exactly this command prefix:
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"chess\" --langs de",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"chess\" --langs de",
  "description": "Analyze chess interest trend on German Wikipedia"
 }
 ```

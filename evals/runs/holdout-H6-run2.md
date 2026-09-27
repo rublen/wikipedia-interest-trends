@@ -32,7 +32,7 @@ I'll analyze the Wikipedia pageview data for papal conclaves in Polish and Itali
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/setup.sh",
+ "command": "<SKILL_DIR>/setup.sh",
  "description": "Initialize the Wikipedia interest trends skill"
 }
 ```
@@ -42,7 +42,7 @@ I'll analyze the Wikipedia pageview data for papal conclaves in Polish and Itali
 ```
 setup: using uv (uv 0.12.18 (Homebrew 2026-09-22 aarch64-apple-darwin))
 setup: OK - run the skill with exactly this command prefix:
-/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py
+<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py
 ```
 </details>
 
@@ -50,7 +50,7 @@ setup: OK - run the skill with exactly this command prefix:
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"papal conclaves\" --langs pl,it --months 24 --report --question \"Is interest in papal conclaves growing in Polish and Italian Wikipedia?\"",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"papal conclaves\" --langs pl,it --months 24 --report --question \"Is interest in papal conclaves growing in Polish and Italian Wikipedia?\"",
  "description": "Analyze papal conclaves interest trends in Polish and Italian Wikipedia"
 }
 ```
@@ -95,7 +95,7 @@ Let me refine the search with the singular form:
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"papal conclave\" --langs pl,it --months 24 --report --question \"Is interest in papal conclaves growing in Polish and Italian Wikipedia?\"",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"papal conclave\" --langs pl,it --months 24 --report --question \"Is interest in papal conclaves growing in Polish and Italian Wikipedia?\"",
  "description": "Analyze papal conclave interest trends with singular form"
 }
 ```
@@ -188,7 +188,7 @@ Analyzing: "conclave" (Q186431), meeting to elect a pope, comparing the last 12 
 
 **Caution:** Both sharp drops in June 2025 suggest a technical or editorial event (article rename, redirect change, search index update) rather than organic interest decline. Before drawing conclusions, check the article's edit history and talk pages for changes around that date.
 
-**Files:** [Chart](file:///Users/mymac/home/wikipedia-interest-trends/output/Q186431-conclave/chart.png) | [Report](file:///Users/mymac/home/wikipedia-interest-trends/output/Q186431-conclave/report.pdf)
+**Files:** [Chart](file://<repo>/output/Q186431-conclave/chart.png) | [Report](file://<repo>/output/Q186431-conclave/report.pdf)
 
 ---
 

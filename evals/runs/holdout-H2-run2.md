@@ -28,7 +28,7 @@ I'll run the Wikipedia Interest Trends analysis to compare how interest in apple
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/setup.sh",
+ "command": "<SKILL_DIR>/setup.sh",
  "description": "Set up the Wikipedia Interest Trends skill"
 }
 ```
@@ -38,7 +38,7 @@ I'll run the Wikipedia Interest Trends analysis to compare how interest in apple
 ```
 setup: using uv (uv 0.12.18 (Homebrew 2026-09-22 aarch64-apple-darwin))
 setup: OK - run the skill with exactly this command prefix:
-/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py
+<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py
 ```
 </details>
 
@@ -46,7 +46,7 @@ setup: OK - run the skill with exactly this command prefix:
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"apples\" --langs pl,cs --months 24",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"apples\" --langs pl,cs --months 24",
  "description": "Compare apple interest in Polish and Czech Wikipedia over 24 months"
 }
 ```
@@ -142,11 +142,11 @@ Article views fell 32.4% (9,946 → 6,726 views total over 12 months). The whole
 
 **Scope:** "Pageviews measure reader interest on Wikipedia, not willingness to pay or market size: use this to choose what to validate next, not to decide on its own."
 
-**Chart:** ![Apple interest chart](file:///Users/mymac/home/wikipedia-interest-trends/output/Q104819-malus/chart.png)
+**Chart:** ![Apple interest chart](file://<repo>/output/Q104819-malus/chart.png)
 
 **Data & Files:**
-- Chart: `/Users/mymac/home/wikipedia-interest-trends/output/Q104819-malus/chart.png`
-- Full data: `/Users/mymac/home/wikipedia-interest-trends/output/Q104819-malus/monthly.csv`
+- Chart: `<repo>/output/Q104819-malus/chart.png`
+- Full data: `<repo>/output/Q104819-malus/monthly.csv`
 
 ---
 

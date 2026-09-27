@@ -45,7 +45,7 @@ Launching skill: wikipedia-interest-trends
 
 ```json
 {
- "command": "/Users/mymac/.claude/skills/wikipedia-interest-trends/.venv/bin/python /Users/mymac/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"English language\" --langs uk,pl,de,es,pt,tr,ja,vi --months 24",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"English language\" --langs uk,pl,de,es,pt,tr,ja,vi --months 24",
  "description": "Compare English language Wikipedia interest across 8 language editions",
  "timeout": 120000
 }

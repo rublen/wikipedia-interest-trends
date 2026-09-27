@@ -24,7 +24,7 @@ Launching skill: wikipedia-interest-trends
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/setup.sh"
+ "command": "<SKILL_DIR>/setup.sh"
 }
 ```
 
@@ -33,7 +33,7 @@ Launching skill: wikipedia-interest-trends
 ```
 setup: using uv (uv 0.12.18 (Homebrew 2026-09-22 aarch64-apple-darwin))
 setup: OK - run the skill with exactly this command prefix:
-/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py
+<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py
 ```
 </details>
 
@@ -41,7 +41,7 @@ setup: OK - run the skill with exactly this command prefix:
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"English language\" --langs uk,pl,de,ru --months 24 --question \"Is interest in English growing in Ukrainian Wikipedia?\" --note \"Proxy: the Wikipedia article on the English language, read in each audience's own language. Usage patterns reflect reader interest in learning about or understanding the English language.\""
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"English language\" --langs uk,pl,de,ru --months 24 --question \"Is interest in English growing in Ukrainian Wikipedia?\" --note \"Proxy: the Wikipedia article on the English language, read in each audience's own language. Usage patterns reflect reader interest in learning about or understanding the English language.\""
 }
 ```
 
@@ -128,7 +128,7 @@ setup: OK - run the skill with exactly this command prefix:
 - Соціальні медіа й пошукові запити про "англійська для українців"
 - Прямі опитування вашої цільової аудиторії
 
-📊 **Графік** розташований тут: `/Users/mymac/home/wikipedia-interest-trends/output/Q1860-english/chart.png`
+📊 **Графік** розташований тут: `<repo>/output/Q1860-english/chart.png`
 
 ---
 

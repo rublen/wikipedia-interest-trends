@@ -36,7 +36,7 @@ I'll set up the skill and run the analysis to compare English language interest 
 
 ```json
 {
- "command": "/Users/mymac/.claude/skills/wikipedia-interest-trends/setup.sh",
+ "command": "<SKILL_DIR>/setup.sh",
  "description": "Initialize Wikipedia interest trends skill"
 }
 ```
@@ -46,7 +46,7 @@ I'll set up the skill and run the analysis to compare English language interest 
 ```
 setup: using uv (uv 0.12.18 (Homebrew 2026-09-22 aarch64-apple-darwin))
 setup: OK - run the skill with exactly this command prefix:
-/Users/mymac/.claude/skills/wikipedia-interest-trends/.venv/bin/python /Users/mymac/.claude/skills/wikipedia-interest-trends/scripts/wit.py
+<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py
 ```
 </details>
 
@@ -58,7 +58,7 @@ Now I'll run the comparison for English language interest across these editions 
 
 ```json
 {
- "command": "/Users/mymac/.claude/skills/wikipedia-interest-trends/.venv/bin/python /Users/mymac/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"English language\" --langs uk,pl,de,es,pt,tr,ja,vi --report --question \"Which markets have the highest interest in English language learning?\" --note \"Proxy: Wikipedia article on English language, read in each audience's own language\"",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"English language\" --langs uk,pl,de,es,pt,tr,ja,vi --report --question \"Which markets have the highest interest in English language learning?\" --note \"Proxy: Wikipedia article on English language, read in each audience's own language\"",
  "description": "Analyze English language interest across Wikipedia editions",
  "timeout": 60000
 }
@@ -177,5 +177,5 @@ By change in share of attention: **de** (share moved 0.7%, within the ±4% norma
 "Pageviews measure reader interest on Wikipedia, not willingness to pay or market size: use this to choose what to validate next, not to decide on its own."
 
 ### Analysis Files
-- **Chart:** `/Users/mymac/home/wikipedia-interest-trends/output/Q1860-english/chart.png`
-- **PDF Report:** `/Users/mymac/home/wikipedia-interest-trends/output/Q1860-english/report.pdf`
+- **Chart:** `<repo>/output/Q1860-english/chart.png`
+- **PDF Report:** `<repo>/output/Q1860-english/report.pdf`

@@ -33,7 +33,7 @@ Let me set up the skill first and then run the analysis for English language lea
 
 ```json
 {
- "command": "SKILL_DIR=/Users/mymac/.claude/skills/wikipedia-interest-trends && $SKILL_DIR/setup.sh",
+ "command": "SKILL_DIR=<SKILL_DIR> && $SKILL_DIR/setup.sh",
  "description": "Setup the Wikipedia interest trends skill"
 }
 ```
@@ -43,7 +43,7 @@ Let me set up the skill first and then run the analysis for English language lea
 ```
 setup: using uv (uv 0.12.18 (Homebrew 2026-09-22 aarch64-apple-darwin))
 setup: OK - run the skill with exactly this command prefix:
-/Users/mymac/.claude/skills/wikipedia-interest-trends/.venv/bin/python /Users/mymac/.claude/skills/wikipedia-interest-trends/scripts/wit.py
+<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py
 ```
 </details>
 
@@ -55,7 +55,7 @@ Now let me run the comparison for the English language topic across the specifie
 
 ```json
 {
- "command": "/Users/mymac/.claude/skills/wikipedia-interest-trends/.venv/bin/python /Users/mymac/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"English language\" --langs uk,pl,de,es,pt,tr,ja,vi --months 24",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"English language\" --langs uk,pl,de,es,pt,tr,ja,vi --months 24",
  "description": "Compare English language interest across Wikipedia editions"
 }
 ```
@@ -130,7 +130,7 @@ I have the core data. Let me now generate a report with the analysis question fo
 
 ```json
 {
- "command": "/Users/mymac/.claude/skills/wikipedia-interest-trends/.venv/bin/python /Users/mymac/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"English language\" --langs uk,pl,de,es,pt,tr,ja,vi --months 24 --report --question \"Which audiences have highest interest and growth potential for a language-learning app?\" --note \"Proxy: the article on the English language (Q1860), read in each audience's own Wikipedia edition.\"",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"English language\" --langs uk,pl,de,es,pt,tr,ja,vi --months 24 --report --question \"Which audiences have highest interest and growth potential for a language-learning app?\" --note \"Proxy: the article on the English language (Q1860), read in each audience's own Wikipedia edition.\"",
  "description": "Generate a report on English language interest across Wikipedia editions"
 }
 ```
@@ -197,7 +197,7 @@ I have the core data. Let me now generate a report with the analysis question fo
 
 ```json
 {
- "file_path": "/Users/mymac/home/wikipedia-interest-trends/output/Q1860-english/chart.png"
+ "file_path": "<repo>/output/Q1860-english/chart.png"
 }
 ```
 
@@ -257,8 +257,8 @@ By change in share of attention, strongest first: de (share moved 0.7%, within t
 
 ### Files
 
-- Chart: `/Users/mymac/home/wikipedia-interest-trends/output/Q1860-english/chart.png`
-- Report (PDF): `/Users/mymac/home/wikipedia-interest-trends/output/Q1860-english/report.pdf`
+- Chart: `<repo>/output/Q1860-english/chart.png`
+- Report (PDF): `<repo>/output/Q1860-english/report.pdf`
 
 ---
 

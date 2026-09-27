@@ -28,7 +28,7 @@ I'll analyze Mercury's interest trends in German Wikipedia over the last two yea
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"Mercury\" --langs de --months 24",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"Mercury\" --langs de --months 24",
  "description": "Fetch Mercury pageview trends for German Wikipedia over 24 months"
 }
 ```
@@ -108,7 +108,7 @@ I'll guess you meant the **planet** — let me fetch that data:
 
 ```json
 {
- "command": "/private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/.venv/bin/python /private/tmp/claude-501/-Users-mymac-home-wikipedia-interest-trends/7afeb3de-e8ff-408d-b5fe-50376521d72b/scratchpad/sandbox/.claude/skills/wikipedia-interest-trends/scripts/wit.py compare \"Mercury\" --qid Q308 --langs de --months 24",
+ "command": "<SKILL_DIR>/.venv/bin/python <SKILL_DIR>/scripts/wit.py compare \"Mercury\" --qid Q308 --langs de --months 24",
  "description": "Fetch Mercury (planet) pageview trends for German Wikipedia"
 }
 ```
@@ -154,10 +154,10 @@ I'll guess you meant the **planet** — let me fetch that data:
   "de"
  ],
  "files": {
-  "chart": "/Users/mymac/home/wikipedia-interest-trends/output/Q308-mercury/chart.png",
-  "data": "/Users/mymac/home/wikipedia-interest-trends/output/Q308-mercury/monthly.csv",
-  "result": "/Users/mymac/home/wikipedia-interest-trends/output/Q308-mercury/result.json",
-  "spec": "/Users/mymac/home/wikipedia-interest-trends/output/Q308-mercury/query.json"
+  "chart": "<repo>/output/Q308-mercury/chart.png",
+  "data": "<repo>/output/Q308-mercury/monthly.csv",
+  "result": "<repo>/output/Q308-mercury/result.json",
+  "spec": "<repo>/output/Q308-mercury/query.json"
  },
  "limitations": [
   "Pageviews measure curiosity among Wikipedia readers, not willingness to pay or market size.",
@@ -184,8 +184,8 @@ Here are the findings:
 The decline in share growth (-13.7%) is larger than what you'd expect from German Wikipedia's overall traffic decline (-7.3%), indicating that Mercury's article lost relative popularity beyond the general trend.
 
 **Data & visualization:**
-- Chart: `/Users/mymac/home/wikipedia-interest-trends/output/Q308-mercury/chart.png`
-- Monthly data: `/Users/mymac/home/wikipedia-interest-trends/output/Q308-mercury/monthly.csv`
+- Chart: `<repo>/output/Q308-mercury/chart.png`
+- Monthly data: `<repo>/output/Q308-mercury/monthly.csv`
 
 These numbers are indicative (no confidence level computed yet) and reflect reader curiosity on Wikipedia, not real-world events. The data excludes identified bots but may contain undetected ones.
 
